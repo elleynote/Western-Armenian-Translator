@@ -85,6 +85,10 @@
   .experiencePolish :global(.translator-grid) {
     grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   }
+
+  .experiencePolish :global(.swap-control-wrap) {
+    left: 46%;
+  }
 }
 
 @media (max-width: 960px) {
