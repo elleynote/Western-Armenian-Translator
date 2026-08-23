@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SiteFrame } from "@/components/SiteFrame";
 import { useAuth } from "@/contexts/AuthContext";
-import { startCheckout } from "@/lib/billing-api";
 import { FALLBACK_PLANS } from "@/lib/plans";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Plan, PlanSlug } from "@/types/database";
 
-function requestedPlan(): "premium" | "business" | null {
-  if (typeof window === "undefined") return null;
-  const value = new URLSearchParams(window.location.search).get("plan");
-  return value === "premium" || value === "business" ? value : null;
-}
+const TUN_CHECKOUT_URLS = {
+  premium: "https://tunapp.com/checkout?add-to-cart=13793",
+  business: "https://tunapp.com/checkout?add-to-cart=13794",
+} as const;
 
 function formatPrice(plan: Plan): string {
   return new Intl.NumberFormat(undefined, {
@@ -29,11 +27,9 @@ function pricingPlanName(slug: PlanSlug): string {
 }
 
 export default function PricingPage() {
-  const { session, plan: current, loading: authLoading } = useAuth();
+  const { plan: current } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [message, setMessage] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
-  const automaticCheckoutStarted = useRef(false);
 
   useEffect(() => {
     void getSupabaseBrowserClient().from("plans").select("*").eq("active", true).order("sort_order")
@@ -44,32 +40,10 @@ export default function PricingPage() {
     ? plans
     : Object.values(FALLBACK_PLANS).map((plan, index) => ({ ...plan, id: `${plan.slug}${index}` }));
 
-  async function beginBilling(slug: "premium" | "business") {
-    if (!session) {
-      const next = `/pricing?plan=${slug}`;
-      location.href = `/signup?next=${encodeURIComponent(next)}`;
-      return;
-    }
-
+  function beginBilling(slug: "premium" | "business") {
     setBusy(slug);
-    setMessage("");
-
-    try {
-      location.href = await startCheckout(session, slug);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not open subscription checkout.");
-      setBusy(null);
-    }
+    location.href = TUN_CHECKOUT_URLS[slug];
   }
-
-  useEffect(() => {
-    const plan = requestedPlan();
-    if (authLoading || !session || !plan || automaticCheckoutStarted.current) return;
-    automaticCheckoutStarted.current = true;
-    void beginBilling(plan);
-    // beginBilling intentionally depends on live auth state and is executed only once per page load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, session]);
 
   return (
     <SiteFrame>
@@ -79,8 +53,6 @@ export default function PricingPage() {
         <p>Upgrade for a larger monthly allowance, longer requests and expanded account features.</p>
         <p>Paid subscriptions are billed annually on Tun&apos;s secure WooCommerce checkout, where the current price, tax and available payment methods are shown before payment.</p>
       </section>
-
-      {message && <div className="info-banner">{message}</div>}
 
       <div className="pricing-grid">
         {display.map(plan => {
@@ -115,19 +87,17 @@ export default function PricingPage() {
               <button
                 className="primary-button full-button"
                 disabled={sameWooPlan || plan.slug === "free" || !!busy}
-                onClick={() => plan.slug !== "free" && void beginBilling(plan.slug)}
+                onClick={() => plan.slug !== "free" && beginBilling(plan.slug)}
               >
                 {sameWooPlan
                   ? "Current plan"
                   : plan.slug === "free"
                     ? "Included"
-                    : !session
-                      ? "Choose plan"
-                      : busy === plan.slug
-                        ? "Opening checkout…"
-                        : sameEffectivePlan && current?.source === "manual"
-                          ? "Subscribe"
-                          : "Choose plan"}
+                    : busy === plan.slug
+                      ? "Opening Tun checkout…"
+                      : sameEffectivePlan && current?.source === "manual"
+                        ? "Subscribe"
+                        : "Choose plan"}
               </button>
             </article>
           );
