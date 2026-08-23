@@ -1,9 +1,8 @@
 <?php
 /**
- * Plugin Name: Tun SaaS Subscription & SSO Bridge
- * Description: Carries Tun checkout/account identity into WooCommerce and provides first-party TunApp OAuth SSO for the Translator.
- * Version: 2.0.0
- * Author: Tun
+ * Internal Tun SaaS checkout identity and first-party Translator SSO core.
+ * This file is loaded by the root Tun Translator SSO Bridge plugin wrapper and
+ * intentionally contains no WordPress plugin header or activation hook.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -68,11 +67,6 @@ function tun_saas_order_wordpress_user_id( $order ) {
     return absint( get_current_user_id() );
 }
 
-/**
- * Capture Tun's opaque checkout token early in the request. The token is kept
- * in the WooCommerce session until an order is completed. This legacy secure
- * account-link path remains supported for Translator-first checkouts.
- */
 function tun_saas_capture_checkout_token() {
     if ( ! function_exists( 'WC' ) || ! WC()->session ) {
         return;
@@ -89,11 +83,6 @@ function tun_saas_capture_checkout_token() {
 }
 add_action( 'wp_loaded', 'tun_saas_capture_checkout_token', 12 );
 
-/**
- * Mapped Person/Elite products always represent one Translator account plan.
- * Normalize the cart even for the new direct Tun checkout flow where no
- * Translator-generated tun_checkout token exists yet.
- */
 function tun_saas_prepare_plan_add_to_cart( $passed, $product_id, $quantity, $variation_id = 0, $variation = array() ) {
     if ( ! $passed || ! tun_saas_is_mapped_product( $product_id, $variation_id ) ) {
         return $passed;
@@ -159,11 +148,6 @@ function tun_saas_add_token_to_order( $order, $data ) {
 }
 add_action( 'woocommerce_checkout_create_order', 'tun_saas_add_token_to_order', 20, 2 );
 
-/**
- * Store the immutable WordPress account identifier available to WooCommerce on
- * mapped plan orders. This is not itself an SSO credential; Supabase only uses
- * it after a verified Tun identity link exists.
- */
 function tun_saas_attach_identity_to_order( $order, $data = array() ) {
     if ( ! is_a( $order, 'WC_Order' ) || ! tun_saas_order_has_mapped_product( $order ) ) {
         return;
@@ -246,6 +230,5 @@ add_action( 'woocommerce_thankyou', 'tun_saas_clear_checkout_token', 20, 1 );
 require_once __DIR__ . '/includes/class-tun-sso-settings.php';
 require_once __DIR__ . '/includes/class-tun-sso-provider.php';
 
-register_activation_hook( __FILE__, array( 'Tun_SSO_Provider', 'activate' ) );
 Tun_SSO_Settings::init();
 Tun_SSO_Provider::init();
