@@ -54,7 +54,7 @@ for (const term of ["anonymous_usage", "plans_admin_write", "get_public_translat
 }
 
 const plansAdmin = fs.readFileSync(path.join(root, "src/app/admin/plans/page.tsx"), "utf8");
-for (const term of ["Anonymous visitor limits", "Stripe recurring Price ID", "Save visitor limits"]) {
+for (const term of ["Anonymous visitor limits", "WooCommerce billing", "Save visitor limits"]) {
   if (!plansAdmin.includes(term)) throw new Error(`Plan administrator missing ${term}`);
 }
 
