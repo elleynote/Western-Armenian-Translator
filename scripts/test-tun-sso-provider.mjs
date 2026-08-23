@@ -16,6 +16,8 @@ function expectTerms(name, source, terms) {
 }
 
 const required = [
+  "wordpress/tun-translator-sso-safe/tun-translator-sso-safe.php",
+  "wordpress/tun-saas-subscription-bridge/tun-saas-subscription-bridge.php",
   "wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-provider.php",
   "wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-settings.php",
   "supabase/migrations/20260824000100_tun_sso_reconciliation.sql",
@@ -29,13 +31,20 @@ for (const file of required) {
   if (!fs.existsSync(path.join(root, file))) throw new Error(`Missing ${file}`);
 }
 
+const wrapper = read("wordpress/tun-translator-sso-safe/tun-translator-sso-safe.php");
+expectTerms("WordPress SSO wrapper", wrapper, [
+  "Plugin Name: Tun Translator SSO Bridge",
+  "Version: 2.0.3",
+  "tun_translator_sso_safe_load_core",
+  "internal/core/tun-saas-subscription-bridge.php",
+]);
+
 const plugin = read("wordpress/tun-saas-subscription-bridge/tun-saas-subscription-bridge.php");
-expectTerms("WordPress SSO bridge", plugin, [
-  "Version: 2.0.0",
-  "Tun SaaS Subscription & SSO Bridge",
+expectTerms("WordPress SSO core", plugin, [
   "class-tun-sso-settings.php",
   "class-tun-sso-provider.php",
-  "register_activation_hook",
+  "Tun_SSO_Settings::init();",
+  "Tun_SSO_Provider::init();",
 ]);
 
 const provider = read("wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-provider.php");
