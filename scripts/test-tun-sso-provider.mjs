@@ -115,9 +115,13 @@ expectTerms("Translator Tun callback", route, [
 ]);
 
 const pricing = read("src/app/pricing/page.tsx");
-expectTerms("Pricing rollback path", pricing, ["startCheckout", "if (!session)"]);
-if (pricing.includes("https://tunapp.com/checkout?add-to-cart=")) {
-  throw new Error("Pricing switched to direct Tun checkout before hosted SSO proof");
+expectTerms("Pricing direct Tun checkout", pricing, [
+  'premium: "https://tunapp.com/checkout?add-to-cart=13793"',
+  'business: "https://tunapp.com/checkout?add-to-cart=13794"',
+  'location.href = TUN_CHECKOUT_URLS[slug]',
+]);
+if (pricing.includes('location.href = `/signup?next=') || pricing.includes("startCheckout(session, slug)")) {
+  throw new Error("Pricing still requires Translator signup before Tun checkout");
 }
 
 const env = read("supabase/functions/_shared/env.ts");
