@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { SiteFrame } from "@/components/SiteFrame";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  isActiveWooPlan,
   reconcileTunIdentity,
+  reconcileTunIdentityWithRetry,
   safeTunNext,
   startTunSignIn,
 } from "@/lib/tun-sso";
@@ -20,6 +22,7 @@ function TunAuthFlow() {
   const [working, setWorking] = useState(true);
 
   const complete = searchParams.get("complete") === "1";
+  const checkout = searchParams.get("checkout") === "1";
   const next = safeTunNext(searchParams.get("next"));
 
   useEffect(() => {
@@ -28,7 +31,7 @@ function TunAuthFlow() {
     if (!complete) {
       started.current = true;
       setWorking(true);
-      void startTunSignIn(next).catch((caught) => {
+      void startTunSignIn(next, { checkout }).catch((caught) => {
         setError(
           caught instanceof Error
             ? caught.message
@@ -55,8 +58,21 @@ function TunAuthFlow() {
     setWorking(true);
     setError("");
 
-    void reconcileTunIdentity(session)
-      .then(async () => {
+    const reconcile = checkout
+      ? reconcileTunIdentityWithRetry(session)
+      : reconcileTunIdentity(session);
+
+    void reconcile
+      .then(async (result) => {
+        if (checkout && !isActiveWooPlan(result)) {
+          setError(
+            "Tun sign-in succeeded, but your subscription activation is still syncing. Wait a moment and retry. No paid access has been granted early.",
+          );
+          setWorking(false);
+          started.current = false;
+          return;
+        }
+
         await refreshProfile();
         router.replace(next);
         router.refresh();
@@ -68,8 +84,9 @@ function TunAuthFlow() {
             : "Your Tun account could not be linked yet. No paid access has been granted.",
         );
         setWorking(false);
+        started.current = false;
       });
-  }, [complete, loading, next, refreshProfile, router, session]);
+  }, [checkout, complete, loading, next, refreshProfile, router, session]);
 
   function retry() {
     started.current = false;
@@ -78,8 +95,21 @@ function TunAuthFlow() {
 
     if (complete && session) {
       started.current = true;
-      void reconcileTunIdentity(session)
-        .then(async () => {
+      const reconcile = checkout
+        ? reconcileTunIdentityWithRetry(session)
+        : reconcileTunIdentity(session);
+
+      void reconcile
+        .then(async (result) => {
+          if (checkout && !isActiveWooPlan(result)) {
+            setError(
+              "Your subscription activation is still syncing. Wait a moment and retry.",
+            );
+            setWorking(false);
+            started.current = false;
+            return;
+          }
+
           await refreshProfile();
           router.replace(next);
           router.refresh();
@@ -91,11 +121,13 @@ function TunAuthFlow() {
               : "Your Tun account could not be linked yet.",
           );
           setWorking(false);
+          started.current = false;
         });
       return;
     }
 
-    void startTunSignIn(next).catch((caught) => {
+    started.current = true;
+    void startTunSignIn(next, { checkout }).catch((caught) => {
       setError(
         caught instanceof Error
           ? caught.message
