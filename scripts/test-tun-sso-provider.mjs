@@ -34,9 +34,9 @@ for (const file of required) {
 const wrapper = read("wordpress/tun-translator-sso-safe/tun-translator-sso-safe.php");
 expectTerms("WordPress SSO wrapper", wrapper, [
   "Plugin Name: Tun Translator SSO Bridge",
-  "Version: 2.0.3",
+  "Version: 2.0.4",
   "tun_translator_sso_safe_load_core",
-  "internal/core/tun-saas-subscription-bridge.php",
+  "internal/core/tun-saas-core.inc",
 ]);
 
 const plugin = read("wordpress/tun-saas-subscription-bridge/tun-saas-subscription-bridge.php");
