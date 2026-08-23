@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Tun Translator SSO Bridge
  * Description: Activation-safe TunApp checkout identity and first-party Translator SSO bridge.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: Tun
  */
 
@@ -10,14 +10,15 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.4';
-const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v204';
-const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v204';
+const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.5';
+const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v205';
+const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v205';
 
 /**
- * Load the tested bridge after WordPress has completed the activation sandbox.
- * The packaged core uses a non-.php extension so WordPress cannot discover it
- * as a second activatable plugin even though PHP can still require it normally.
+ * Load the tested bridge immediately when this plugin file is included.
+ * WordPress includes a plugin during activation after `plugins_loaded` has
+ * already fired, so deferring this require to that hook would skip the core on
+ * the activation request. Database setup is still deferred to admin_init.
  */
 function tun_translator_sso_safe_load_core() {
     $core = __DIR__ . '/internal/core/tun-saas-core.inc';
@@ -29,7 +30,8 @@ function tun_translator_sso_safe_load_core() {
 
     require_once $core;
 }
-add_action( 'plugins_loaded', 'tun_translator_sso_safe_load_core', 20 );
+
+tun_translator_sso_safe_load_core();
 
 /**
  * Install the OAuth grant table on a normal admin request, never inside the
