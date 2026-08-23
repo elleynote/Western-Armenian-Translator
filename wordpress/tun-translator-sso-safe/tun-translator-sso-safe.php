@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Tun Translator SSO Bridge
- * Description: Activation-safe TunApp checkout identity and first-party Translator SSO bridge.
- * Version: 2.0.5
+ * Description: TunApp checkout identity and first-party Translator SSO bridge.
+ * Version: 2.0.6
  * Author: Tun
  */
 
@@ -10,34 +10,32 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.5';
-const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v205';
-const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v205';
+const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.6';
+const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v206';
+const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v206';
 
-/**
- * Load the tested bridge immediately when this plugin file is included.
- * WordPress includes a plugin during activation after `plugins_loaded` has
- * already fired, so deferring this require to that hook would skip the core on
- * the activation request. Database setup is still deferred to admin_init.
+/*
+ * The current production package already contains these files. Load the two
+ * SSO classes directly from the root plugin file so WordPress does not depend
+ * on the previous nested-core bootstrap to discover them.
  */
-function tun_translator_sso_safe_load_core() {
-    $core = __DIR__ . '/internal/core/tun-saas-core.inc';
+$settings_file = __DIR__ . '/internal/core/includes/class-tun-sso-settings.php';
+$provider_file = __DIR__ . '/internal/core/includes/class-tun-sso-provider.php';
+$core_file     = __DIR__ . '/internal/core/tun-saas-core.inc';
 
-    if ( ! is_readable( $core ) ) {
-        update_option( TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION, 'The Tun SSO core file is missing. Reinstall the plugin package.', false );
-        return;
-    }
-
-    require_once $core;
+if ( ! is_readable( $settings_file ) || ! is_readable( $provider_file ) || ! is_readable( $core_file ) ) {
+    add_action( 'admin_notices', function () {
+        if ( current_user_can( 'manage_options' ) ) {
+            echo '<div class="notice notice-error"><p><strong>Tun Translator SSO:</strong> One or more required plugin files are unreadable.</p></div>';
+        }
+    } );
+    return;
 }
 
-tun_translator_sso_safe_load_core();
+require_once $settings_file;
+require_once $provider_file;
+require_once $core_file;
 
-/**
- * Install the OAuth grant table on a normal admin request, never inside the
- * activation sandbox. Any environment-specific database failure is captured
- * and shown as an admin notice instead of becoming a fatal activation error.
- */
 function tun_translator_sso_safe_maybe_install() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
