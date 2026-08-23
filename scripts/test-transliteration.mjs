@@ -6,7 +6,7 @@ assert.equal(transliterateWesternArmenian("ես կը սիրեմ"), "yes gë sire
 assert.equal(transliterateWesternArmenian("Ես կը սիրեմ"), "Yes gë sirem");
 assert.equal(transliterateWesternArmenian("բարեւ, ես լաւ եմ"), "parev, es lav yem");
 assert.equal(transliterateWesternArmenian("բարեւ։ ես լաւ եմ"), "parev։ yes lav yem");
-assert.equal(transliterateWesternArmenian("եկեղեցի"), "yegeghetsi");
+assert.equal(transliterateWesternArmenian("եկեղեցի"), "yegeghets'i");
 assert.equal(transliterateWesternArmenian("մեր"), "mer");
 assert.equal(transliterateWesternArmenian("որ"), "vor");
 assert.equal(transliterateWesternArmenian("սովոր"), "sovor");
