@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Lint Tun SSO WordPress PHP
+        run: |
+          php -l wordpress/tun-saas-subscription-bridge/tun-saas-subscription-bridge.php
+          php -l wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-settings.php
+          php -l wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-provider.php
+          php -l wordpress/tun-translator-sso-safe/tun-translator-sso-safe.php
       - run: npm run lint
       - run: npm run test
       - run: npm run verify

@@ -112,8 +112,25 @@ export function AuthForm({
       ? `?next=${encodeURIComponent(next)}`
       : "";
 
+  const tunHref = `/auth/tun?next=${encodeURIComponent(next)}`;
+
   return (
     <form className="auth-form" onSubmit={submit}>
+      {mode === "login" && (
+        <>
+          <Link
+            className="primary-button full-button"
+            href={tunHref}
+            style={{ textAlign: "center", textDecoration: "none" }}
+          >
+            Continue with Tun
+          </Link>
+          <p style={{ margin: 0, textAlign: "center" }}>
+            Or use your existing Translator login
+          </p>
+        </>
+      )}
+
       {mode === "signup" && (
         <>
           <label>

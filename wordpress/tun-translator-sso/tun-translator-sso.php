@@ -1,17 +1,27 @@
 <?php
 /**
- * Internal Tun SaaS checkout identity and first-party Translator SSO core.
- * This file is loaded by the root Tun Translator SSO Bridge plugin wrapper and
- * intentionally contains no WordPress plugin header or activation hook.
+ * Plugin Name: Tun Translator SSO Bridge
+ * Description: TunApp checkout identity and first-party OAuth SSO bridge for the Translator.
+ * Version: 2.1.0
+ * Author: Tun
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+const TUN_TRANSLATOR_SSO_VERSION = '2.1.0';
+const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v210';
+const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v210';
 const TUN_SAAS_CHECKOUT_QUERY_KEY       = 'tun_checkout';
 const TUN_SAAS_CHECKOUT_META_KEY        = '_tun_checkout_token';
 const TUN_SAAS_WORDPRESS_USER_META_KEY  = '_tun_wordpress_user_id';
+
+require_once __DIR__ . '/includes/class-tun-sso-settings.php';
+require_once __DIR__ . '/includes/class-tun-sso-provider.php';
+
+Tun_SSO_Settings::init();
+Tun_SSO_Provider::init();
 
 function tun_saas_mapped_product_ids() {
     return array( 13793, 13794 );
@@ -227,8 +237,39 @@ function tun_saas_clear_checkout_token( $order_id ) {
 }
 add_action( 'woocommerce_thankyou', 'tun_saas_clear_checkout_token', 20, 1 );
 
-require_once __DIR__ . '/includes/class-tun-sso-settings.php';
-require_once __DIR__ . '/includes/class-tun-sso-provider.php';
+function tun_translator_sso_maybe_install() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
 
-Tun_SSO_Settings::init();
-Tun_SSO_Provider::init();
+    if ( get_option( TUN_TRANSLATOR_SSO_INSTALL_OPTION ) === TUN_TRANSLATOR_SSO_VERSION ) {
+        return;
+    }
+
+    try {
+        Tun_SSO_Provider::activate();
+        update_option( TUN_TRANSLATOR_SSO_INSTALL_OPTION, TUN_TRANSLATOR_SSO_VERSION, false );
+        delete_option( TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION );
+    } catch ( Throwable $error ) {
+        update_option(
+            TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION,
+            'Tun SSO database setup could not complete: ' . sanitize_text_field( $error->getMessage() ),
+            false
+        );
+    }
+}
+add_action( 'admin_init', 'tun_translator_sso_maybe_install', 50 );
+
+function tun_translator_sso_admin_notice() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $message = get_option( TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION );
+    if ( ! is_string( $message ) || '' === trim( $message ) ) {
+        return;
+    }
+
+    echo '<div class="notice notice-error"><p><strong>Tun Translator SSO:</strong> ' . esc_html( $message ) . '</p></div>';
+}
+add_action( 'admin_notices', 'tun_translator_sso_admin_notice' );
