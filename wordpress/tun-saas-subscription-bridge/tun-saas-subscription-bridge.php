@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Tun SaaS Subscription Bridge
- * Description: Carries Tun checkout and account identity metadata onto WooCommerce orders/subscriptions so the Translator can link entitlements securely.
- * Version: 1.1.0
+ * Plugin Name: Tun SaaS Subscription & SSO Bridge
+ * Description: Carries Tun checkout/account identity into WooCommerce and provides first-party TunApp OAuth SSO for the Translator.
+ * Version: 2.0.0
  * Author: Tun
  */
 
@@ -242,3 +242,10 @@ function tun_saas_clear_checkout_token( $order_id ) {
     }
 }
 add_action( 'woocommerce_thankyou', 'tun_saas_clear_checkout_token', 20, 1 );
+
+require_once __DIR__ . '/includes/class-tun-sso-settings.php';
+require_once __DIR__ . '/includes/class-tun-sso-provider.php';
+
+register_activation_hook( __FILE__, array( 'Tun_SSO_Provider', 'activate' ) );
+Tun_SSO_Settings::init();
+Tun_SSO_Provider::init();
