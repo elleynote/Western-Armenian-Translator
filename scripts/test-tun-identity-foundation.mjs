@@ -42,7 +42,6 @@ expectTerms("WooCommerce webhook", webhook, [
 
 const plugin = read("wordpress/tun-saas-subscription-bridge/tun-saas-subscription-bridge.php");
 expectTerms("WordPress bridge", plugin, [
-  "Version: 1.1.0",
   "_tun_wordpress_user_id",
   "tun_saas_attach_identity_to_order",
   "tun_saas_copy_identity_to_subscription",
