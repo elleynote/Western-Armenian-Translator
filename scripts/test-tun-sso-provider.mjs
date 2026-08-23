@@ -47,7 +47,7 @@ expectTerms("Tun SSO provider", provider, [
   "code_challenge_method",
   "S256",
   "wp_login_url",
-  "hash('sha256'",
+  "sha256",
   "wp_check_password",
   "hash_equals",
   "Authorization",
