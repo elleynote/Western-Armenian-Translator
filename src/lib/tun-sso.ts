@@ -10,18 +10,22 @@ export function safeTunNext(value: string | null | undefined): string {
     : "/dashboard";
 }
 
-export async function startTunSignIn(next?: string): Promise<void> {
+export async function startTunSignIn(
+  next?: string,
+  options?: { checkout?: boolean },
+): Promise<void> {
   const supabase = getSupabaseBrowserClient();
   const safeNext = safeTunNext(next);
   const provider = TUN_OAUTH_PROVIDER as Parameters<
     typeof supabase.auth.signInWithOAuth
   >[0]["provider"];
+  const checkout = options?.checkout === true ? "&checkout=1" : "";
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
       scopes: "profile email",
-      redirectTo: `${location.origin}/auth/tun?complete=1&next=${encodeURIComponent(safeNext)}`,
+      redirectTo: `${location.origin}/auth/tun?complete=1&next=${encodeURIComponent(safeNext)}${checkout}`,
     },
   });
 
@@ -34,6 +38,15 @@ export interface TunReconciliationResult {
   status?: string | null;
   woocommerce_subscription_id?: number | null;
   plan?: Record<string, unknown> | null;
+}
+
+export function isActiveWooPlan(result: TunReconciliationResult): boolean {
+  const plan = result.plan;
+  if (!plan || typeof plan !== "object" || Array.isArray(plan)) return false;
+
+  return plan.source === "woocommerce"
+    && (plan.slug === "premium" || plan.slug === "business")
+    && plan.subscription_status === "active";
 }
 
 export async function reconcileTunIdentity(
@@ -59,4 +72,23 @@ export async function reconcileTunIdentity(
   }
 
   return data as TunReconciliationResult;
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+export async function reconcileTunIdentityWithRetry(
+  session: Session,
+  attempts = 6,
+  delayMs = 1500,
+): Promise<TunReconciliationResult> {
+  let result = await reconcileTunIdentity(session);
+
+  for (let attempt = 1; attempt < attempts && !isActiveWooPlan(result); attempt += 1) {
+    await wait(delayMs);
+    result = await reconcileTunIdentity(session);
+  }
+
+  return result;
 }
