@@ -16,9 +16,7 @@ function expectTerms(name, source, terms) {
 }
 
 const required = [
-  "wordpress/tun-translator-sso/tun-translator-sso.php",
-  "wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-provider.php",
-  "wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-settings.php",
+  "wordpress/tun-translator-sso-bridge/tun-translator-sso-bridge.php",
   "supabase/migrations/20260824000100_tun_sso_reconciliation.sql",
   "supabase/functions/tun-identity-reconcile/index.ts",
   "supabase/functions/tun-identity-reconcile/deno.json",
@@ -30,20 +28,13 @@ for (const file of required) {
   if (!fs.existsSync(path.join(root, file))) throw new Error(`Missing ${file}`);
 }
 
-const plugin = read("wordpress/tun-translator-sso/tun-translator-sso.php");
+const plugin = read("wordpress/tun-translator-sso-bridge/tun-translator-sso-bridge.php");
 expectTerms("WordPress SSO plugin", plugin, [
   "Plugin Name: Tun Translator SSO Bridge",
-  "Version: 2.1.0",
-  "includes/class-tun-sso-settings.php",
-  "includes/class-tun-sso-provider.php",
-  "Tun_SSO_Settings::init();",
-  "Tun_SSO_Provider::init();",
-  "woocommerce_checkout_create_order",
-  "woocommerce_checkout_subscription_created",
-]);
-
-const provider = read("wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-provider.php");
-expectTerms("Tun SSO provider", provider, [
+  "Version: 3.1.0",
+  "final class Tun_Translator_SSO_Settings",
+  "final class Tun_Translator_SSO_Bridge",
+  "final class Tun_Translator_SSO_Provider",
   "tun-sso/v1",
   "/authorize",
   "/token",
@@ -51,28 +42,21 @@ expectTerms("Tun SSO provider", provider, [
   "code_challenge_method",
   "S256",
   "wp_login_url",
-  "sha256",
+  "wp_hash_password",
   "wp_check_password",
-  "hash_equals",
-  "Authorization",
-  "Basic",
-  "base64_decode",
   "access_token_hash",
   "woocommerce_checkout_registration_required",
   "woocommerce_checkout_registration_enabled",
+  "woocommerce_checkout_create_order",
+  "woocommerce_checkout_subscription_created",
   "Continue to Translator",
-  "tun_saas_sso_cleanup",
+  "checkout=1",
+  "is_paid()",
+  "window.setTimeout",
 ]);
-
-const settings = read("wordpress/tun-saas-subscription-bridge/includes/class-tun-sso-settings.php");
-expectTerms("Tun SSO settings", settings, [
-  "tun_saas_sso_settings",
-  "indgjoridkhnazitubom.supabase.co/auth/v1/callback",
-  "western-armenian-translator.netlify.app",
-  "wp_hash_password",
-  "random_bytes",
-  "manage_options",
-]);
+if (plugin.includes("require_once")) {
+  throw new Error("v3 SSO plugin must remain a single-file package without include-loader dependencies");
+}
 
 const migration = read("supabase/migrations/20260824000100_tun_sso_reconciliation.sql");
 expectTerms("Tun reconciliation migration", migration, [
@@ -104,12 +88,19 @@ expectTerms("Translator Tun SSO helper", sso, [
   "profile email",
   "tun-identity-reconcile",
   "safeTunNext",
+  "reconcileTunIdentityWithRetry",
+  "isActiveWooPlan",
+  "checkout=1",
 ]);
 
 const route = read("src/app/auth/tun/page.tsx");
 expectTerms("Translator Tun callback", route, [
   "Connecting to Tun",
   "reconcileTunIdentity",
+  "reconcileTunIdentityWithRetry",
+  "isActiveWooPlan",
+  'searchParams.get("checkout") === "1"',
+  "subscription activation is still syncing",
   "refreshProfile",
   "Retry",
 ]);
