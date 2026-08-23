@@ -190,6 +190,25 @@ final class Tun_SSO_Provider {
             && Tun_SSO_Settings::redirect_uri();
     }
 
+    private static function token_client_credentials( WP_REST_Request $request ) {
+        $authorization = trim( (string) $request->get_header( 'Authorization' ) );
+
+        if ( preg_match( '/^Basic\s+(.+)$/i', $authorization, $matches ) ) {
+            $decoded = base64_decode( $matches[1], true );
+            if ( false === $decoded || false === strpos( $decoded, ':' ) ) {
+                return array( '', '' );
+            }
+
+            $parts = explode( ':', $decoded, 2 );
+            return array( trim( (string) $parts[0] ), (string) $parts[1] );
+        }
+
+        return array(
+            trim( (string) $request->get_param( 'client_id' ) ),
+            (string) $request->get_param( 'client_secret' ),
+        );
+    }
+
     public static function authorize( WP_REST_Request $request ) {
         $client_id = trim( (string) $request->get_param( 'client_id' ) );
         $redirect_uri = trim( (string) $request->get_param( 'redirect_uri' ) );
@@ -290,8 +309,7 @@ final class Tun_SSO_Provider {
         }
 
         $grant_type = trim( (string) $request->get_param( 'grant_type' ) );
-        $client_id = trim( (string) $request->get_param( 'client_id' ) );
-        $client_secret = (string) $request->get_param( 'client_secret' );
+        list( $client_id, $client_secret ) = self::token_client_credentials( $request );
         $code = trim( (string) $request->get_param( 'code' ) );
         $redirect_uri = trim( (string) $request->get_param( 'redirect_uri' ) );
         $verifier = trim( (string) $request->get_param( 'code_verifier' ) );
