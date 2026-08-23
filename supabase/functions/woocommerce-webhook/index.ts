@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 type AnyRecord = Record<string, unknown>;
 type PaidPlan = { planId: string; planSlug: "premium" | "business"; productId: number };
 type CheckoutLink = { id: string; userId: string; planId: string; planSlug: "premium" | "business"; productId: number };
+type TunIdentityResolution = { userId: string | null; conflict: boolean };
 
 function record(value: unknown): AnyRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? value as AnyRecord : {};
@@ -80,6 +81,10 @@ function billingEmail(payload: AnyRecord): string {
   return stringValue(record(payload.billing).email).toLowerCase();
 }
 
+function wordpressUserId(payload: AnyRecord): number | null {
+  return integerValue(metadataValue(payload, ["_tun_wordpress_user_id", "tun_wordpress_user_id", "wordpress_user_id"]));
+}
+
 function productIds(payload: AnyRecord): number[] {
   const result: number[] = [];
   const items = Array.isArray(payload.line_items) ? payload.line_items : [];
@@ -148,6 +153,35 @@ async function resolveCheckoutLink(
   };
 }
 
+async function resolveTunIdentityUserId(admin: SupabaseClient, payload: AnyRecord): Promise<TunIdentityResolution> {
+  const candidates = new Set<string>();
+  const wpUserId = wordpressUserId(payload);
+  const customerId = integerValue(payload.customer_id);
+
+  if (wpUserId) {
+    const { data, error } = await admin
+      .from("tun_identity_links")
+      .select("user_id")
+      .eq("provider", "tunapp")
+      .eq("wordpress_user_id", wpUserId)
+      .maybeSingle();
+    if (!error && typeof data?.user_id === "string") candidates.add(data.user_id);
+  }
+
+  if (customerId) {
+    const { data, error } = await admin
+      .from("tun_identity_links")
+      .select("user_id")
+      .eq("provider", "tunapp")
+      .eq("woocommerce_customer_id", customerId)
+      .maybeSingle();
+    if (!error && typeof data?.user_id === "string") candidates.add(data.user_id);
+  }
+
+  if (candidates.size > 1) return { userId: null, conflict: true };
+  return { userId: candidates.values().next().value || null, conflict: false };
+}
+
 async function resolveLegacyUserId(admin: SupabaseClient, payload: AnyRecord): Promise<string | null> {
   const linkedUserId = metadataValue(payload, ["tun_user_id", "_tun_user_id", "supabase_user_id"]);
   if (linkedUserId) {
@@ -168,6 +202,41 @@ async function freePlanId(admin: SupabaseClient): Promise<string | null> {
 
 async function markEvent(admin: SupabaseClient, eventId: string, values: Record<string, unknown>) {
   await admin.from("woocommerce_webhook_events").update(values).eq("event_id", eventId);
+}
+
+async function savePendingEntitlement(
+  admin: SupabaseClient,
+  payload: AnyRecord,
+  plan: PaidPlan,
+  subscriptionId: number,
+  topic: string,
+  linkStatus: "pending" | "conflict",
+  lastError: string | null
+) {
+  const now = new Date().toISOString();
+  const status = stringValue(payload.status).toLowerCase().replace(/_/gu, "-") || "inactive";
+  const { error } = await admin.from("woocommerce_pending_entitlements").upsert({
+    woocommerce_subscription_id: subscriptionId,
+    woocommerce_order_id: integerValue(payload.parent_id),
+    woocommerce_customer_id: integerValue(payload.customer_id),
+    wordpress_user_id: wordpressUserId(payload),
+    billing_email: billingEmail(payload) || null,
+    plan_id: plan.planId,
+    plan_slug: plan.planSlug,
+    product_id: plan.productId,
+    status,
+    provider_updated_at: isoValue(payload.date_modified_gmt) || isoValue(payload.date_modified) || now,
+    linked_user_id: null,
+    link_status: linkStatus,
+    last_error: lastError,
+    metadata: {
+      webhook_topic: topic,
+      wc_status: status,
+      payment_method: stringValue(payload.payment_method) || null,
+      account_link: "pending_entitlement"
+    }
+  }, { onConflict: "woocommerce_subscription_id" });
+  if (error) throw error;
 }
 
 Deno.serve(async (request: Request): Promise<Response> => {
@@ -250,7 +319,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const checkout = await resolveCheckoutLink(admin, payload, subscriptionId, plan);
 
     // A supplied checkout token must validate. Never silently downgrade a bad
-    // token to email matching, because the token is the production account link.
+    // token to another account-matching mechanism because the token is the
+    // production account link for the legacy Translator-first checkout flow.
     if (checkout.tokenPresent && !checkout.link) {
       await markEvent(admin, eventId, {
         processing_status: "unmatched",
@@ -266,22 +336,58 @@ Deno.serve(async (request: Request): Promise<Response> => {
       return json({ received: true, matched: false });
     }
 
-    const userId = checkout.link?.userId || await resolveLegacyUserId(admin, payload);
-    if (!userId || !plan) {
+    if (!plan) {
       await markEvent(admin, eventId, {
         processing_status: "unmatched",
         processed_at: new Date().toISOString(),
         safe_summary: {
           woocommerce_subscription_id: subscriptionId,
           customer_id: integerValue(payload.customer_id),
+          wordpress_user_id: wordpressUserId(payload),
           product_ids: productIds(payload),
           checkout_token_present: checkout.tokenPresent,
-          billing_email_present: Boolean(billingEmail(payload)),
-          matched_user: Boolean(userId),
-          matched_plan: Boolean(plan)
+          matched_plan: false
         }
       });
       return json({ received: true, matched: false });
+    }
+
+    const tunIdentity = checkout.link
+      ? { userId: null, conflict: false }
+      : await resolveTunIdentityUserId(admin, payload);
+    const legacyUserId = checkout.link || tunIdentity.userId || tunIdentity.conflict
+      ? null
+      : await resolveLegacyUserId(admin, payload);
+    const userId = checkout.link?.userId || tunIdentity.userId || legacyUserId;
+
+    if (!userId) {
+      const linkStatus = tunIdentity.conflict ? "conflict" : "pending";
+      const lastError = tunIdentity.conflict
+        ? "Tun WordPress/WooCommerce identifiers resolve to different Supabase users."
+        : null;
+      await savePendingEntitlement(admin, payload, plan, subscriptionId, topic, linkStatus, lastError);
+
+      const now = new Date().toISOString();
+      await markEvent(admin, eventId, {
+        processing_status: "completed",
+        processed_at: now,
+        last_error: null,
+        safe_summary: {
+          woocommerce_subscription_id: subscriptionId,
+          customer_id: integerValue(payload.customer_id),
+          wordpress_user_id: wordpressUserId(payload),
+          product_id: plan.productId,
+          plan_slug: plan.planSlug,
+          checkout_token_present: checkout.tokenPresent,
+          billing_email_present: Boolean(billingEmail(payload)),
+          matched_user: false,
+          matched_plan: true,
+          pending_entitlement: true,
+          identity_conflict: tunIdentity.conflict,
+          account_link: "pending_entitlement"
+        }
+      });
+      return json({ received: true, matched: false, pending: true });
     }
 
     const status = stringValue(payload.status).toLowerCase().replace(/_/gu, "-") || "inactive";
@@ -290,6 +396,11 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const customerId = integerValue(payload.customer_id);
     const parentId = integerValue(payload.parent_id);
     const email = billingEmail(payload);
+    const accountLink = checkout.link
+      ? "checkout_token"
+      : tunIdentity.userId
+        ? "tun_identity"
+        : "legacy_fallback";
     const { data: localSubscription } = await admin
       .from("subscriptions")
       .select("access_suspended,access_suspended_reason")
@@ -323,7 +434,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
         webhook_topic: topic,
         wc_status: status,
         payment_method: stringValue(payload.payment_method) || null,
-        account_link: checkout.link ? "checkout_token" : "legacy_fallback"
+        account_link: accountLink,
+        wordpress_user_id: wordpressUserId(payload)
       }
     }, { onConflict: "user_id" });
     if (subscriptionError) throw subscriptionError;
@@ -335,6 +447,17 @@ Deno.serve(async (request: Request): Promise<Response> => {
         .eq("id", checkout.link.id);
       if (consumeError) throw consumeError;
     }
+
+    await admin
+      .from("woocommerce_pending_entitlements")
+      .update({
+        linked_user_id: userId,
+        link_status: "linked",
+        last_error: null,
+        status,
+        provider_updated_at: isoValue(payload.date_modified_gmt) || isoValue(payload.date_modified) || now
+      })
+      .eq("woocommerce_subscription_id", subscriptionId);
 
     const targetPlanId = active ? plan.planId : await freePlanId(admin);
     if (targetPlanId) {
@@ -349,11 +472,12 @@ Deno.serve(async (request: Request): Promise<Response> => {
       safe_summary: {
         woocommerce_subscription_id: subscriptionId,
         user_id: userId,
+        wordpress_user_id: wordpressUserId(payload),
         plan_slug: plan.planSlug,
         product_id: plan.productId,
         status,
         paid_access: active,
-        account_link: checkout.link ? "checkout_token" : "legacy_fallback"
+        account_link: accountLink
       }
     });
 
