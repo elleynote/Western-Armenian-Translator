@@ -31,7 +31,7 @@ for (const file of required) {
 const plugin = read("wordpress/tun-translator-sso-bridge/tun-translator-sso-bridge.php");
 expectTerms("WordPress SSO plugin", plugin, [
   "Plugin Name: Tun Translator SSO Bridge",
-  "Version: 3.1.0",
+  "Version: 3.1.2",
   "final class Tun_Translator_SSO_Settings",
   "final class Tun_Translator_SSO_Bridge",
   "final class Tun_Translator_SSO_Provider",
@@ -41,7 +41,11 @@ expectTerms("WordPress SSO plugin", plugin, [
   "/userinfo",
   "code_challenge_method",
   "S256",
-  "wp_login_url",
+  "wc_get_page_permalink( 'myaccount' )",
+  "tun_sso_return",
+  "woocommerce_login_form",
+  "woocommerce_register_form",
+  "woocommerce_login_redirect",
   "wp_hash_password",
   "wp_check_password",
   "access_token_hash",
@@ -54,6 +58,9 @@ expectTerms("WordPress SSO plugin", plugin, [
   "is_paid()",
   "window.setTimeout",
 ]);
+if (plugin.includes("site_url( 'wp-login.php', 'login' )") || plugin.includes("wp_login_url(")) {
+  throw new Error("Tun SSO must use the WooCommerce My Account login, not the core WordPress login page");
+}
 if (plugin.includes("require_once")) {
   throw new Error("v3 SSO plugin must remain a single-file package without include-loader dependencies");
 }
