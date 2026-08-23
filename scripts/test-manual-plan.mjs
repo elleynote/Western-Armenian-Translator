@@ -25,7 +25,7 @@ assert.ok(overridePosition > 0 && subscriptionPosition > overridePosition && fre
 const adminFunction = migration.slice(migration.indexOf("create or replace function public.admin_set_user_plan_override"), migration.indexOf("create or replace function public.get_my_widget_sites"));
 assert.ok(!/insert\s+into\s+public\.(subscriptions|billing_payments|stripe_webhook_events)/iu.test(adminFunction), "Manual grants must not create Stripe records");
 assert.ok(usersPage.includes("Use billing/default"), "Admin users page must support returning control to billing/default");
-assert.ok(usersPage.includes("does not cancel the active Stripe subscription"), "Admin users page must warn when forcing Free during billing");
+assert.ok(usersPage.includes("does not cancel the active paid subscription"), "Admin users page must warn when forcing Free during active billing");
 assert.ok(account.includes("effective_plan_for_user"), "Main translation account resolver must use centralized effective-plan logic");
 
-console.log("Static manual-plan authorization, priority, expiry, audit and Stripe-separation checks passed.");
+console.log("Static manual-plan authorization, priority, expiry, audit and billing-separation checks passed.");
