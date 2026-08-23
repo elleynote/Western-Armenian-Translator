@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.widget-translate]
 verify_jwt = false
+
+[functions.tun-identity-reconcile]
+verify_jwt = false
