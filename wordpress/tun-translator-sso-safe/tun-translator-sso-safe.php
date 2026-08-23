@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Tun Translator SSO Bridge
  * Description: Activation-safe TunApp checkout identity and first-party Translator SSO bridge.
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: Tun
  */
 
@@ -10,17 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.2';
-const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v202';
-const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v202';
+const TUN_TRANSLATOR_SSO_SAFE_VERSION = '2.0.3';
+const TUN_TRANSLATOR_SSO_INSTALL_OPTION = 'tun_translator_sso_install_v203';
+const TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION = 'tun_translator_sso_install_error_v203';
 
 /**
- * Load the already-tested bridge only after WordPress has completed the plugin
- * activation sandbox. The core's own activation hook is therefore registered
- * for the nested core file and is never executed while this wrapper activates.
+ * Load the tested bridge after WordPress has completed the activation sandbox.
+ * The core intentionally lives two directories below the plugin root so its
+ * legacy plugin header is not discovered as a second activatable plugin.
  */
 function tun_translator_sso_safe_load_core() {
-    $core = __DIR__ . '/core/tun-saas-subscription-bridge.php';
+    $core = __DIR__ . '/internal/core/tun-saas-subscription-bridge.php';
 
     if ( ! is_readable( $core ) ) {
         update_option( TUN_TRANSLATOR_SSO_INSTALL_ERROR_OPTION, 'The Tun SSO core file is missing. Reinstall the plugin package.', false );
