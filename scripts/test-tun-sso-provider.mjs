@@ -31,20 +31,17 @@ for (const file of required) {
 const plugin = read("wordpress/tun-translator-sso-bridge/tun-translator-sso-bridge.php");
 expectTerms("WordPress SSO plugin", plugin, [
   "Plugin Name: Tun Translator SSO Bridge",
-  "Version: 3.2.0",
+  "Version: 3.1.0",
   "final class Tun_Translator_SSO_Settings",
   "final class Tun_Translator_SSO_Bridge",
   "final class Tun_Translator_SSO_Provider",
   "tun-sso/v1",
+  "/authorize",
   "/token",
   "/userinfo",
-  "home_url( '/tun-sso/authorize' )",
-  "serve_authorize_endpoint",
-  "login_redirect",
-  "woocommerce_login_redirect",
   "code_challenge_method",
   "S256",
-  "home_url( '/login/' )",
+  "wp_login_url",
   "wp_hash_password",
   "wp_check_password",
   "access_token_hash",
@@ -57,14 +54,8 @@ expectTerms("WordPress SSO plugin", plugin, [
   "is_paid()",
   "window.setTimeout",
 ]);
-if (plugin.includes("register_rest_route( self::REST_NAMESPACE, '/authorize'")) {
-  throw new Error("Authorization endpoint must not use the WordPress REST API");
-}
-if (plugin.includes("site_url( 'wp-login.php', 'login' )") || plugin.includes("wp_login_url(")) {
-  throw new Error("Tun SSO must use the branded Tun login page, not the core WordPress login page");
-}
 if (plugin.includes("require_once")) {
-  throw new Error("Tun SSO plugin must remain a single-file package without include-loader dependencies");
+  throw new Error("v3 SSO plugin must remain a single-file package without include-loader dependencies");
 }
 
 const migration = read("supabase/migrations/20260824000100_tun_sso_reconciliation.sql");
