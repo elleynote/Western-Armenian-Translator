@@ -697,3 +697,148 @@
     grid-column: auto;
   }
 }
+
+@media (max-width: 600px) {
+  .experience :global(.translator-grid) {
+    gap: 12px;
+  }
+
+  .experience :global(.panel-header) {
+    min-height: 56px;
+    padding: 8px 10px;
+  }
+
+  .experience :global(.select-wrap) {
+    width: 100%;
+    min-width: 0;
+    padding: 7px 9px;
+  }
+
+  .experience :global(.select-wrap select),
+  .experience :global(.panel-body textarea),
+  .experience :global(.translation-output),
+  .experience :global(.output-panel .voice-speed-select) {
+    font-size: 16px;
+  }
+
+  .experience :global(.panel-action),
+  .experience :global(.output-secondary-action),
+  .experience :global(.speech-input-button),
+  .experience :global(.swap-button) {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .experience :global(.output-panel .voice-listen-control .panel-action) {
+    width: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .experience :global(.output-panel .voice-speed-select) {
+    width: 64px;
+    min-width: 64px;
+    min-height: 48px;
+  }
+
+  .experience :global(.output-panel .panel-actions > .panel-action) {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .experience :global(.mobile-translate-button) {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .quickAction {
+    min-height: 76px;
+    padding: 12px;
+  }
+
+  .quickAction strong,
+  .learningTool strong {
+    font-size: 15px;
+  }
+
+  .quickAction small,
+  .learningTool small,
+  .aiCard p,
+  .aiCard li {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .aiCard,
+  .learningCard,
+  .exampleCard,
+  .historyCard {
+    padding: 16px;
+  }
+
+  .aiCard h2 {
+    font-size: 21px;
+  }
+
+  .aiButton {
+    width: 100%;
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .sectionHeading h2 {
+    font-size: 18px;
+  }
+
+  .learningTool {
+    min-height: 84px;
+    padding: 14px;
+  }
+
+  .exampleChips {
+    gap: 8px;
+  }
+
+  .exampleChips button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .historyHeading {
+    align-items: flex-start;
+  }
+
+  .historyHeading a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .historyList article {
+    gap: 6px;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .historyList span,
+  .historyList strong {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .historyList small {
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  .emptyHistory {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
