@@ -400,6 +400,56 @@
   .activityChart {
     min-width: 480px;
   }
+
+  .periodButton,
+  .retryButton {
+    min-height: 44px;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+
+  .toolbar,
+  .card,
+  .metricCard,
+  .stateCard {
+    padding: 16px;
+  }
+
+  .metricLabel,
+  .metricHint,
+  .cardHeader p,
+  .periodMeta span,
+  .ratingNote,
+  .stateCard p,
+  .emptyState p,
+  .ratingMeta span {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .periodMeta strong,
+  .ratingMeta strong,
+  .practiceLink,
+  .lockedCard a {
+    font-size: 14px;
+  }
+
+  .cardHeader h2 {
+    font-size: 20px;
+  }
+
+  .cardBadge {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .activityViewport {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media (max-width: 480px) {
