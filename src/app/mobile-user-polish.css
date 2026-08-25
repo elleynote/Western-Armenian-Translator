@@ -1,0 +1,14 @@
+@media (max-width: 760px) {
+  .user-dashboard-nav a,
+  .main-nav .nav-link,
+  .main-nav .premium-feature-nav-link,
+  .main-nav .mobile-session-action {
+    min-height: 48px;
+  }
+
+  .auth-form input,
+  .pricing-card button,
+  .pricing-card a {
+    font-size: 16px;
+  }
+}
