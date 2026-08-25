@@ -1,14 +1,419 @@
+/*
+ * Customer-facing phone UI polish.
+ *
+ * Keep every rule in this file mobile-scoped so desktop/laptop layouts remain
+ * identical to the existing product. Dashboard rules are additionally scoped
+ * to user-only classes so the administration interface is not redesigned.
+ */
+
 @media (max-width: 760px) {
-  .user-dashboard-nav a,
+  :root {
+    --mobile-page-gutter: 16px;
+    --mobile-control-height: 48px;
+    --mobile-compact-control-height: 44px;
+    --mobile-card-padding: 16px;
+    --mobile-section-gap: 22px;
+  }
+
+  .shell {
+    width: calc(100% - (var(--mobile-page-gutter) * 2));
+  }
+
+  .main-content,
+  .main-content-compact {
+    padding-top: 20px;
+    padding-bottom: calc(36px + env(safe-area-inset-bottom));
+  }
+
+  .page-intro,
+  .user-dashboard-heading,
+  .intro-section,
+  .word-breakdown-hero {
+    margin-bottom: 18px;
+  }
+
+  .page-intro h1,
+  .user-dashboard-heading h1,
+  .intro-section h1,
+  .auth-card h1,
+  .legal-page h1,
+  .word-breakdown-hero h1 {
+    font-size: clamp(28px, 8vw, 32px);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+  }
+
+  .page-intro p,
+  .user-dashboard-heading p,
+  .auth-card p,
+  .legal-page p,
+  .word-breakdown-hero > p:last-child {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .mobile-nav-toggle,
+  .main-nav .nav-link,
+  .main-nav .premium-feature-nav-link,
+  .main-nav .mobile-session-action,
+  .primary-button,
+  .danger-button {
+    min-height: var(--mobile-control-height);
+  }
+
+  .mobile-nav-toggle {
+    width: var(--mobile-control-height);
+    height: var(--mobile-control-height);
+    padding-inline: 13px;
+  }
+
+  .main-nav {
+    right: 0;
+    left: 0;
+    max-height: min(76dvh, 560px);
+    padding: 10px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    border-radius: 12px;
+  }
+
   .main-nav .nav-link,
   .main-nav .premium-feature-nav-link,
   .main-nav .mobile-session-action {
+    padding: 12px 14px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .user-dashboard-nav {
+    gap: 8px;
+    margin-inline: calc(var(--mobile-page-gutter) * -1);
+    padding: 2px var(--mobile-page-gutter) 8px;
+    scroll-padding-inline: var(--mobile-page-gutter);
+  }
+
+  .user-dashboard-nav a {
     min-height: 48px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  .user-dashboard-content {
+    gap: var(--mobile-section-gap);
+  }
+
+  .user-dashboard-content .stats-grid,
+  .user-dashboard-content .readiness-grid,
+  .user-dashboard-content .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .user-dashboard-content .stat-card,
+  .user-dashboard-content .dashboard-card {
+    padding: var(--mobile-card-padding);
+    border-radius: 12px;
+  }
+
+  .user-dashboard-content .stat-card > span,
+  .user-dashboard-content .readiness-grid span {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .user-dashboard-content .stat-card strong,
+  .user-dashboard-content .readiness-grid strong {
+    overflow-wrap: anywhere;
+  }
+
+  .user-dashboard-content .card-heading {
+    gap: 8px;
+  }
+
+  .user-dashboard-content .card-heading h2 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .user-dashboard-content .card-heading p,
+  .user-dashboard-content .dashboard-card p,
+  .user-dashboard-content .form-message,
+  .user-dashboard-content .info-banner {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .user-dashboard-content input,
+  .user-dashboard-content select,
+  .user-dashboard-content textarea,
+  .auth-form input,
+  .auth-form select,
+  .auth-form textarea {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .user-dashboard-content textarea,
+  .auth-form textarea {
+    line-height: 1.5;
+  }
+
+  .user-dashboard-content .button-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .user-dashboard-content .button-row > a,
+  .user-dashboard-content .button-row > button,
+  .user-dashboard-content .row-actions > a,
+  .user-dashboard-content .row-actions > button {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 14px;
+    font-size: 15px;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .pricing-grid > :last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .pricing-card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .pricing-card h2,
+  .pricing-card h3 {
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .pricing-card p,
+  .pricing-card li {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .pricing-card button,
+  .pricing-card a,
+  .pricing-card .primary-button {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .pricing-card .primary-button {
+    width: 100%;
+  }
+
+  .auth-card {
+    width: 100%;
+    margin: 4px auto;
+    padding: 22px 16px;
+    border-radius: 14px;
+  }
+
+  .auth-form {
+    gap: 14px;
   }
 
   .auth-form input,
-  .pricing-card button,
-  .pricing-card a {
+  .auth-form select,
+  .auth-form textarea,
+  .auth-form button,
+  .auth-form .primary-button {
+    width: 100%;
+    min-height: 48px;
     font-size: 16px;
+  }
+
+  .auth-links {
+    gap: 8px;
+  }
+
+  .auth-links a {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .word-breakdown-page {
+    display: grid;
+    gap: 18px;
+  }
+
+  .word-breakdown-search-card,
+  .word-breakdown-access-card,
+  .word-breakdown-meaning-card,
+  .word-breakdown-word-card,
+  .word-breakdown-section {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .word-breakdown-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .word-breakdown-form label,
+  .word-breakdown-detail-label,
+  .word-breakdown-helper,
+  .word-breakdown-counter {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .word-breakdown-input {
+    width: 100%;
+    min-height: 132px;
+    padding: 14px;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .word-breakdown-submit,
+  .word-breakdown-access-card .primary-button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .word-breakdown-form-footer,
+  .word-breakdown-section-heading,
+  .word-breakdown-word-heading,
+  .word-breakdown-access-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .word-breakdown-meaning-grid,
+  .word-breakdown-word-grid,
+  .word-breakdown-word-details {
+    grid-template-columns: 1fr;
+  }
+
+  .word-breakdown-meaning-card p,
+  .word-breakdown-grammar-note p,
+  .word-breakdown-notes li {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .word-breakdown-word,
+  .word-breakdown-query-text,
+  .word-breakdown-base-form {
+    overflow-wrap: anywhere;
+  }
+
+  .footer-inner {
+    gap: 10px;
+    padding-top: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .footer-links {
+    gap: 8px 12px;
+    justify-content: flex-start;
+  }
+
+  .footer-links a {
+    min-height: 44px;
+    padding: 8px 4px;
+    font-size: 14px;
+  }
+
+  .upgrade-modal-backdrop {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .upgrade-modal {
+    width: 100%;
+    max-height: min(88dvh, calc(100vh - 24px));
+    padding: 18px 16px max(18px, env(safe-area-inset-bottom));
+    border-radius: 16px 16px 0 0;
+  }
+
+  .upgrade-modal-close {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .legal-page {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    min-height: 60px;
+    gap: 8px;
+  }
+
+  .tun-logo-link,
+  .tun-logo-image {
+    width: 72px;
+  }
+
+  .user-dashboard-content .stat-card,
+  .user-dashboard-content .dashboard-card,
+  .pricing-card,
+  .auth-card,
+  .word-breakdown-search-card,
+  .word-breakdown-access-card,
+  .word-breakdown-meaning-card,
+  .word-breakdown-word-card,
+  .word-breakdown-section {
+    padding: 15px;
+  }
+
+  .user-dashboard-content .button-row,
+  .word-breakdown-form-footer {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 359px) {
+  :root {
+    --mobile-page-gutter: 12px;
+  }
+
+  .page-intro h1,
+  .user-dashboard-heading h1,
+  .intro-section h1,
+  .auth-card h1,
+  .legal-page h1,
+  .word-breakdown-hero h1 {
+    font-size: 26px;
+  }
+
+  .user-dashboard-nav a {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 760px) and (hover: none) and (pointer: coarse) {
+  .primary-button:hover:not(:disabled),
+  .mobile-nav-toggle:hover,
+  .user-dashboard-nav a:hover,
+  .pricing-card a:hover,
+  .word-breakdown-submit:hover:not(:disabled) {
+    transform: none;
   }
 }
