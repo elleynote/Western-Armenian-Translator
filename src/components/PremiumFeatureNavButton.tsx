@@ -353,46 +353,16 @@ export function PremiumFeatureNavButton({
                     View plans
                   </Link>
 
-                  {!user ? (
-                    <>
-                      <Link
-                        href="/signup?next=%2Fpricing"
-                        className="upgrade-modal-secondary premium-modal-link"
-                        onClick={() =>
-                          setOpen(false)
-                        }
-                      >
-                        Sign up
-                      </Link>
-
-                      <Link
-                        href="/login"
-                        className="upgrade-modal-secondary premium-modal-link"
-                        onClick={() =>
-                          setOpen(false)
-                        }
-                      >
-                        Log in
-                      </Link>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      className="upgrade-modal-secondary"
-                      onClick={() =>
-                        setOpen(false)
-                      }
-                    >
-                      Maybe later
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="upgrade-modal-secondary"
+                    onClick={() =>
+                      setOpen(false)
+                    }
+                  >
+                    Maybe later
+                  </button>
                 </div>
-
-                <p className="upgrade-modal-note">
-                  {!user
-                    ? "Create an account or log in to continue."
-                    : "Your Free account can upgrade to Person or Schools for paid feature access."}
-                </p>
               </>
             ) : (
               <>
