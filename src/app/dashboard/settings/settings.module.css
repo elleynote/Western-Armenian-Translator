@@ -49,3 +49,13 @@
   background: #211f1e;
   color: #f8f6f4;
 }
+
+@media (max-width: 760px) {
+  .settingsSelect {
+    min-height: 48px;
+    padding: 11px 40px 11px 13px;
+    border-radius: 9px;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+}
