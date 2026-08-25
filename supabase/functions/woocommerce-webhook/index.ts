@@ -318,24 +318,6 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const plan = await resolvePlan(admin, payload);
     const checkout = await resolveCheckoutLink(admin, payload, subscriptionId, plan);
 
-    // A supplied checkout token must validate. Never silently downgrade a bad
-    // token to another account-matching mechanism because the token is the
-    // production account link for the legacy Translator-first checkout flow.
-    if (checkout.tokenPresent && !checkout.link) {
-      await markEvent(admin, eventId, {
-        processing_status: "unmatched",
-        processed_at: new Date().toISOString(),
-        safe_summary: {
-          woocommerce_subscription_id: subscriptionId,
-          product_ids: productIds(payload),
-          checkout_token_present: true,
-          checkout_token_valid: false,
-          matched_plan: Boolean(plan)
-        }
-      });
-      return json({ received: true, matched: false });
-    }
-
     if (!plan) {
       await markEvent(admin, eventId, {
         processing_status: "unmatched",
@@ -346,6 +328,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
           wordpress_user_id: wordpressUserId(payload),
           product_ids: productIds(payload),
           checkout_token_present: checkout.tokenPresent,
+          checkout_token_valid: Boolean(checkout.link),
           matched_plan: false
         }
       });
@@ -355,7 +338,13 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const tunIdentity = checkout.link
       ? { userId: null, conflict: false }
       : await resolveTunIdentityUserId(admin, payload);
-    const legacyUserId = checkout.link || tunIdentity.userId || tunIdentity.conflict
+
+    // A stale or invalid legacy checkout token must never unlock access by
+    // falling back to an email match. It may, however, be superseded by the
+    // immutable Tun/WordPress identity carried on the signed Woo subscription.
+    // If no immutable identity can resolve yet, store a pending entitlement so
+    // a later successful Tun SSO can reconcile it safely.
+    const legacyUserId = checkout.link || tunIdentity.userId || tunIdentity.conflict || checkout.tokenPresent
       ? null
       : await resolveLegacyUserId(admin, payload);
     const userId = checkout.link?.userId || tunIdentity.userId || legacyUserId;
@@ -379,6 +368,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
           product_id: plan.productId,
           plan_slug: plan.planSlug,
           checkout_token_present: checkout.tokenPresent,
+          checkout_token_valid: Boolean(checkout.link),
           billing_email_present: Boolean(billingEmail(payload)),
           matched_user: false,
           matched_plan: true,
@@ -435,7 +425,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
         wc_status: status,
         payment_method: stringValue(payload.payment_method) || null,
         account_link: accountLink,
-        wordpress_user_id: wordpressUserId(payload)
+        wordpress_user_id: wordpressUserId(payload),
+        stale_checkout_token_ignored: checkout.tokenPresent && !checkout.link && Boolean(tunIdentity.userId)
       }
     }, { onConflict: "user_id" });
     if (subscriptionError) throw subscriptionError;
@@ -477,6 +468,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
         product_id: plan.productId,
         status,
         paid_access: active,
+        checkout_token_present: checkout.tokenPresent,
+        checkout_token_valid: Boolean(checkout.link),
         account_link: accountLink
       }
     });

@@ -153,7 +153,7 @@ export function Header() {
               ) : (
                 <Link
                   className="nav-link mobile-session-action"
-                  href="/login"
+                  href="/auth/tun?next=%2Fdashboard"
                 >
                   Log in
                 </Link>
@@ -172,7 +172,10 @@ export function Header() {
                   Log out
                 </button>
               ) : (
-                <Link className="text-button header-session-action" href="/login">
+                <Link
+                  className="text-button header-session-action"
+                  href="/auth/tun?next=%2Fdashboard"
+                >
                   Log in
                 </Link>
               )

@@ -22,6 +22,7 @@ const required = [
   "supabase/functions/tun-identity-reconcile/deno.json",
   "src/lib/tun-sso.ts",
   "src/app/auth/tun/page.tsx",
+  "src/components/Header.tsx",
 ];
 
 for (const file of required) {
@@ -113,6 +114,16 @@ expectTerms("Pricing direct Tun checkout", pricing, [
 ]);
 if (pricing.includes('location.href = `/signup?next=') || pricing.includes("startCheckout(session, slug)")) {
   throw new Error("Pricing still requires Translator signup before Tun checkout");
+}
+
+const header = read("src/components/Header.tsx");
+const directTunLoginHref = 'href="/auth/tun?next=%2Fdashboard"';
+const directTunLoginCount = header.split(directTunLoginHref).length - 1;
+if (directTunLoginCount !== 2) {
+  throw new Error(`Header must route both desktop and mobile Log in links directly through Tun SSO; found ${directTunLoginCount}`);
+}
+if (header.includes('href="/login"')) {
+  throw new Error("Header still routes Log in through the intermediate Translator login page");
 }
 
 const env = read("supabase/functions/_shared/env.ts");
