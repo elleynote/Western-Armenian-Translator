@@ -190,26 +190,68 @@
     flex-direction: column;
   }
 
+  .flashcard-session-header-actions > button,
+  .flashcard-session-header-actions > a,
+  .flashcard-review-saved .primary-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
   .flashcard-mastery-badge {
     width: 100%;
+    padding: 12px 14px;
     text-align: left;
+  }
+
+  .flashcard-mastery-badge span,
+  .flashcard-mastery-badge small {
+    font-size: 12px;
+  }
+
+  .flashcard-mastery-badge strong {
+    font-size: 16px;
   }
 
   .flashcard-rating-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .flashcard-rating-button {
+    min-height: 72px;
+    padding: 12px 14px;
+  }
+
+  .flashcard-rating-button strong {
+    font-size: 16px;
+  }
+
+  .flashcard-rating-button span,
+  .flashcard-review-heading p,
+  .flashcard-review-status,
+  .flashcard-review-feedback,
+  .flashcard-session-review-note,
+  .flashcards-complete-mastery-note {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .flashcard-review-kicker {
+    font-size: 12px;
   }
 
   .flashcard-review-panel {
-    padding: 14px;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .flashcard-review-heading h3 {
+    font-size: 19px;
   }
 
   .flashcard-review-saved {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .flashcard-review-saved .primary-button {
-    width: 100%;
   }
 
   .flashcard-session-review-note {

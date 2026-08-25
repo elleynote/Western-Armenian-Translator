@@ -250,4 +250,62 @@
   .streakFooter span:last-child {
     text-align: left;
   }
+
+  .streakCard {
+    gap: 16px;
+  }
+
+  .streakHeading {
+    gap: 10px;
+  }
+
+  .streakHeading h2 {
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .streakHeading p,
+  .currentStreak p,
+  .streakLocked p {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .currentStreak,
+  .streakMetric,
+  .streakLocked {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .streakStatus {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .currentStreak > span,
+  .streakMetric > span,
+  .streakMetric small,
+  .streakFooter,
+  .streakError p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .currentStreakValue strong {
+    font-size: 42px;
+  }
+
+  .streakMetric strong {
+    font-size: 24px;
+  }
+
+  .currentStreak a,
+  .streakLocked a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+  }
 }

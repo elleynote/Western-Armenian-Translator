@@ -294,4 +294,59 @@
     display: grid;
     grid-template-columns: 1fr;
   }
+
+  .history-search-input,
+  .history-filter-button,
+  .history-toolbar .danger-button,
+  .history-card-actions button,
+  .history-card-actions a,
+  .history-pagination button,
+  .history-access-card .primary-button {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .history-search-input {
+    font-size: 16px;
+  }
+
+  .history-toolbar,
+  .history-card,
+  .history-access-card {
+    padding: 16px;
+  }
+
+  .history-results-meta,
+  .history-message,
+  .history-card time,
+  .history-language-pair,
+  .history-role-play-meta,
+  .history-thesaurus-group p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .history-source,
+  .history-result,
+  .history-thesaurus-input,
+  .history-role-play-title {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .history-type-badge {
+    min-height: 32px;
+    font-size: 12px;
+  }
+
+  .history-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .history-pagination button {
+    width: 100%;
+    min-width: 0;
+  }
 }

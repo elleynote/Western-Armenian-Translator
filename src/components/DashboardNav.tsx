@@ -204,7 +204,7 @@ export function DashboardNav({
 
   return (
     <nav
-      className="dashboard-nav"
+      className="dashboard-nav user-dashboard-nav"
       aria-label="Dashboard navigation"
     >
       {USER_ITEMS.map(

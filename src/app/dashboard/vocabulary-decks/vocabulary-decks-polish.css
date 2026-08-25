@@ -126,6 +126,33 @@
     padding: 14px;
   }
 
+  .vocabulary-deck-edit-form input,
+  .vocabulary-deck-edit-form textarea,
+  .vocabulary-deck-edit-form .primary-button,
+  .vocabulary-deck-phrase-heading-actions > *,
+  .vocabulary-deck-phrase-heading-actions .primary-button,
+  .vocabulary-deck-phrase-heading-actions .vocabulary-deck-secondary-button,
+  .vocabulary-deck-phrase-heading-actions .vocabulary-deck-text-link {
+    min-height: 48px;
+  }
+
+  .vocabulary-deck-edit-form input,
+  .vocabulary-deck-edit-form textarea {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .vocabulary-deck-edit-form label,
+  .vocabulary-deck-phrase-heading p {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .vocabulary-deck-phrase-heading h3 {
+    font-size: 19px;
+    line-height: 1.3;
+  }
+
   .vocabulary-deck-edit-form .primary-button {
     grid-column: auto;
     width: 100%;
@@ -140,6 +167,8 @@
   .vocabulary-deck-phrase-heading-actions .vocabulary-deck-secondary-button,
   .vocabulary-deck-phrase-heading-actions .vocabulary-deck-text-link {
     width: 100%;
+    padding: 11px 13px;
+    font-size: 15px;
     white-space: normal;
   }
 }

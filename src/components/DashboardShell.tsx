@@ -50,7 +50,7 @@ export function DashboardShell({
 
   return (
     <SiteFrame compact>
-      <div className="dashboard-heading">
+      <div className={admin ? "dashboard-heading" : "dashboard-heading user-dashboard-heading"}>
         <div>
           <p className="eyebrow">
             {admin
@@ -72,7 +72,7 @@ export function DashboardShell({
         admin={admin}
       />
 
-      <div className="dashboard-content">
+      <div className={admin ? "dashboard-content" : "dashboard-content user-dashboard-content"}>
         {showDailyPractice ? (
           <DailyPracticePhraseCard />
         ) : null}
