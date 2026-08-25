@@ -360,6 +360,209 @@
   }
 }
 
+@media (max-width: 760px) {
+  .saved-phrases-page {
+    gap: 16px;
+  }
+
+  .saved-phrases-toolbar,
+  .saved-phrase-card,
+  .saved-phrases-access-card {
+    border-radius: 12px;
+  }
+
+  .saved-phrases-toolbar {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .saved-phrases-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .saved-phrases-tabs button,
+  .saved-phrases-search input,
+  .saved-phrase-actions button,
+  .saved-phrase-deck-picker select,
+  .saved-phrase-deck-picker button {
+    min-height: 48px;
+  }
+
+  .saved-phrases-tabs button,
+  .saved-phrase-actions button,
+  .saved-phrase-deck-picker button {
+    font-size: 15px;
+  }
+
+  .saved-phrases-search input,
+  .saved-phrase-deck-picker select {
+    font-size: 16px;
+  }
+
+  .saved-phrase-card-header,
+  .saved-phrase-card-meta {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .saved-phrase-card-meta {
+    flex-wrap: wrap;
+  }
+
+  .saved-phrase-text-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-phrase-main-text {
+    font-size: 17px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .saved-phrase-transliteration,
+  .saved-phrase-field-label,
+  .saved-phrases-summary,
+  .saved-phrase-card time {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .saved-phrase-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 14px 16px 16px;
+  }
+
+  .saved-phrase-actions button {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .saved-phrase-delete-action {
+    margin-left: 0;
+  }
+
+  .role-play-page,
+  .thesaurus-page {
+    gap: 18px;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .role-play-hero h1 {
+    font-size: clamp(28px, 8vw, 32px);
+    line-height: 1.12;
+  }
+
+  .role-play-hero > p:last-child,
+  .role-play-section-heading p:last-child,
+  .role-play-conversation-header p,
+  .role-play-scenario-card > p,
+  .role-play-scenario-goal {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .role-play-access-card,
+  .role-play-scenario-panel,
+  .role-play-conversation-header,
+  .role-play-composer,
+  .role-play-complete-panel {
+    padding: 16px;
+  }
+
+  .role-play-section-heading h2,
+  .role-play-conversation-header h2 {
+    font-size: 21px;
+    line-height: 1.3;
+  }
+
+  .role-play-scenario-card {
+    min-height: 48px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .role-play-scenario-card h3 {
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .role-play-start-button,
+  .role-play-send-button,
+  .role-play-end-button,
+  .role-play-complete-panel .primary-button,
+  .role-play-access-card .primary-button {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .role-play-turn {
+    max-width: 96%;
+  }
+
+  .role-play-bubble {
+    padding: 13px 14px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .role-play-armenian-message {
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  .role-play-transliteration {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .role-play-composer textarea {
+    min-height: 112px;
+    padding: 13px;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .role-play-composer-footer > span,
+  .role-play-voice-input > span:last-child,
+  .role-play-speech-language {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .role-play-speech-language select {
+    width: 100%;
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .role-play-assistant-actions button,
+  .role-play-voice-tools button {
+    min-height: 48px;
+  }
+
+  .thesaurus-search-card,
+  .thesaurus-results-card,
+  .thesaurus-access-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .thesaurus-search-card input,
+  .thesaurus-search-card select,
+  .thesaurus-search-card button {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .thesaurus-result-item {
+    gap: 10px;
+  }
+}
+
 @media (max-width: 480px) {
   .header-inner {
     min-height: 60px;
@@ -387,6 +590,14 @@
   .word-breakdown-form-footer {
     gap: 8px;
   }
+
+  .saved-phrase-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .role-play-transcript {
+    padding: 16px 12px;
+  }
 }
 
 @media (max-width: 359px) {
@@ -399,12 +610,17 @@
   .intro-section h1,
   .auth-card h1,
   .legal-page h1,
-  .word-breakdown-hero h1 {
+  .word-breakdown-hero h1,
+  .role-play-hero h1 {
     font-size: 26px;
   }
 
   .user-dashboard-nav a {
     padding-inline: 12px;
+  }
+
+  .saved-phrases-tabs {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -413,7 +629,8 @@
   .mobile-nav-toggle:hover,
   .user-dashboard-nav a:hover,
   .pricing-card a:hover,
-  .word-breakdown-submit:hover:not(:disabled) {
+  .word-breakdown-submit:hover:not(:disabled),
+  .role-play-scenario-card:hover {
     transform: none;
   }
 }
