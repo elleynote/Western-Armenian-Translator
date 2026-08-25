@@ -94,18 +94,32 @@
 @media (max-width: 680px) {
   .thesaurus-language-toggle {
     width: 100%;
+    gap: 4px;
   }
 
   .thesaurus-language-toggle button {
     flex: 1;
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 14px;
   }
 
   .thesaurus-result-item {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .thesaurus-result-meaning,
+  .thesaurus-query-meaning {
+    font-size: 14px;
+    line-height: 1.55;
   }
 
   .thesaurus-save-button {
     width: fit-content;
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 14px;
   }
 
   .thesaurus-query-meaning {
