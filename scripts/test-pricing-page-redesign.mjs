@@ -36,7 +36,6 @@ if (!source.includes("https://tunapp.com/checkout?add-to-cart=13794")) {
 const responsiveVisualRequirements = [
   ["transform: translateY(-12px) scale(1.01);", "Premium card is not elevated on desktop"],
   ["0 18px 48px rgba(93, 49, 216, .18)", "Premium card does not have the stronger featured shadow"],
-  ["padding-top: 24px;", "Pricing content is not spaced safely below the site header"],
   [".premiumCard { transform: none; }", "Premium elevation is not reset for stacked tablet/mobile layouts"],
 ];
 
@@ -44,6 +43,20 @@ for (const [needle, message] of responsiveVisualRequirements) {
   if (!styles.includes(needle)) {
     throw new Error(message);
   }
+}
+
+const desktopPageRule = styles.match(/\.page\s*\{([\s\S]*?)\}/)?.[1] ?? "";
+const hasDesktopTopSpacing =
+  /padding:\s*[1-9]\d*px\s+0\s+\d+px\s*;/.test(desktopPageRule) ||
+  /padding-top:\s*[1-9]\d*px\s*;/.test(desktopPageRule);
+
+if (!hasDesktopTopSpacing) {
+  throw new Error("Pricing content is not spaced safely below the site header");
+}
+
+const responsiveTopSpacingRules = styles.match(/\.page\s*\{\s*padding-top:\s*[1-9]\d*px;\s*\}/g) ?? [];
+if (responsiveTopSpacingRules.length < 2) {
+  throw new Error("Pricing header spacing is not adjusted for tablet and mobile layouts");
 }
 
 console.log("Pricing page redesign checks passed.");
