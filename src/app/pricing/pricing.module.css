@@ -1,0 +1,421 @@
+.page {
+  --purple: #6d43e8;
+  --purple-dark: #5d31d8;
+  --purple-soft: #f1edff;
+  --green: #159667;
+  --green-soft: #eef9f5;
+  --gold: #d89c00;
+  --gold-dark: #c28a00;
+  --gold-soft: #fff8e7;
+  max-width: 1384px;
+  margin: 0 auto;
+  padding: 24px 0 8px;
+}
+
+.hero {
+  text-align: center;
+  margin: 0 auto 46px;
+  max-width: 980px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 18px;
+  border-radius: 999px;
+  background: #f2effb;
+  color: #6240d4;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .045em;
+}
+
+.hero h1 {
+  margin: 13px 0 8px;
+  color: #11192d;
+  font-size: clamp(42px, 4.25vw, 61px);
+  line-height: 1.07;
+  letter-spacing: -.04em;
+  font-weight: 800;
+}
+
+.hero p {
+  margin: 0;
+  color: #4e596d;
+  font-size: clamp(17px, 1.55vw, 21px);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px;
+  align-items: stretch;
+}
+
+.card {
+  position: relative;
+  min-width: 0;
+  min-height: 555px;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 28px 24px;
+  border: 1px solid #e7e9ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(27, 35, 52, .05);
+}
+
+.premiumCard {
+  z-index: 2;
+  border-color: #cfc1ff;
+  box-shadow: 0 18px 48px rgba(93, 49, 216, .18), 0 6px 18px rgba(35, 27, 72, .08);
+  padding-top: 51px;
+  transform: translateY(-12px) scale(1.01);
+  transform-origin: center center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.popularRibbon {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px 11px 0 0;
+  background: linear-gradient(90deg, #7145e6 0%, #6e43df 52%, #7547e9 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .035em;
+}
+
+.cardTop {
+  min-height: 105px;
+}
+
+.planKicker {
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.freeKicker { color: var(--green); }
+.premiumKicker { color: var(--purple); }
+.eliteKicker { color: var(--gold); }
+
+.card h2 {
+  margin: 0;
+  color: #101725;
+  font-size: 29px;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+  font-weight: 800;
+}
+
+.description {
+  min-height: 42px;
+  margin: 10px 0 0;
+  color: #5a6477;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.eliteTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.eliteStar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff7df;
+  color: var(--gold);
+}
+
+.freeHighlight {
+  min-height: 82px;
+  margin: 17px 0 22px;
+  padding: 17px 17px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #d8eee7;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #f6fcfa 0%, #eef9f5 100%);
+}
+
+.highlightIcon {
+  color: var(--green);
+  flex: 0 0 auto;
+}
+
+.freeHighlight strong,
+.freeHighlight span {
+  display: block;
+}
+
+.freeHighlight strong {
+  color: var(--green);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.freeHighlight span {
+  margin-top: 3px;
+  color: #667084;
+  font-size: 13px;
+}
+
+.price {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.price strong {
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: -.035em;
+  font-weight: 900;
+}
+
+.price span {
+  color: #4b5567;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.premiumPrice strong { color: var(--purple); }
+.elitePrice strong { color: var(--gold-dark); }
+
+.valuePill {
+  width: fit-content;
+  margin: 12px 0 24px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.premiumPill {
+  background: var(--purple-soft);
+  color: #675b82;
+}
+
+.elitePill {
+  background: var(--gold-soft);
+  color: #6f5d25;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 15px;
+  flex: 1;
+}
+
+.featureList li {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #4e596c;
+  font-size: 14px;
+  line-height: 1.38;
+}
+
+.featureList li > span:last-child {
+  min-width: 0;
+}
+
+.featureList strong {
+  color: #273143;
+  font-weight: 900;
+}
+
+.featureList small {
+  margin-left: 8px;
+  color: #687286;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.checkIcon,
+.featureGlyph {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+
+.freeIcon { color: var(--green); }
+.premiumIcon { color: var(--purple); }
+.eliteIcon { color: var(--gold); }
+.featureGlyph { color: var(--purple); }
+.eliteGlyph { color: var(--gold); }
+
+.cardFooter {
+  margin-top: 28px;
+}
+
+.cta {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+.cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(.99);
+}
+
+.cta:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.freeCta {
+  border: 1px solid #53b99a;
+  background: #fff;
+  color: var(--green);
+}
+
+.premiumCta {
+  border: 1px solid var(--purple);
+  background: linear-gradient(90deg, #6540df 0%, #7245e8 100%);
+  color: #fff;
+  box-shadow: 0 7px 14px rgba(106, 67, 224, .16);
+}
+
+.eliteCta {
+  border: 1px solid #dda400;
+  background: linear-gradient(90deg, #d79a00 0%, #e5ab05 100%);
+  color: #fff;
+  box-shadow: 0 7px 14px rgba(215, 154, 0, .14);
+}
+
+.ctaNote {
+  min-height: 18px;
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #657084;
+  font-size: 12px;
+  text-align: center;
+}
+
+.ctaNote b {
+  font-weight: 700;
+}
+
+.benefits {
+  margin-top: 31px;
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  border: 1px solid #e9ebf0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.benefitItem {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.benefitIcon {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.safe { background: #eef9f5; color: #1aa277; }
+.unlimited { background: #f3efff; color: #7048e7; }
+.learners { background: #edf8ff; color: #168ed7; }
+.love { background: #fff0f2; color: #e12141; }
+
+.benefitItem h3 {
+  margin: 1px 0 5px;
+  color: #172033;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.benefitItem p {
+  margin: 0;
+  color: #626c7e;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.billingNote {
+  margin: 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #697387;
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .grid { gap: 18px; }
+  .card { padding-left: 22px; padding-right: 22px; }
+  .benefits { gap: 20px; }
+}
+
+@media (max-width: 980px) {
+  .page { padding-top: 18px; }
+  .desktopBreak { display: none; }
+  .grid { grid-template-columns: 1fr; gap: 22px; }
+  .card { min-height: 0; }
+  .premiumCard { transform: none; }
+  .benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero { margin-bottom: 28px; }
+}
+
+@media (max-width: 640px) {
+  .page { padding-top: 12px; }
+  .hero { margin-bottom: 22px; }
+  .eyebrow { min-height: 26px; padding: 3px 12px; font-size: 11px; }
+  .hero h1 { margin-top: 10px; font-size: clamp(34px, 10vw, 44px); }
+  .hero p { font-size: 15px; line-height: 1.5; }
+  .card { padding: 22px 18px 20px; border-radius: 10px; }
+  .premiumCard { padding-top: 46px; }
+  .popularRibbon { height: 24px; }
+  .cardTop { min-height: 0; }
+  .description { min-height: 0; }
+  .price strong { font-size: 37px; }
+  .featureList { gap: 13px; }
+  .featureList small { display: block; margin: 2px 0 0; }
+  .benefits { grid-template-columns: 1fr; padding: 20px 18px; gap: 22px; }
+  .billingNote { padding: 0 10px; text-align: center; }
+}
