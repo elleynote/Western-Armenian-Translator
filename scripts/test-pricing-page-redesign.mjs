@@ -1,6 +1,7 @@
 import fs from "node:fs";
 
 const source = fs.readFileSync(new URL("../src/app/pricing/page.tsx", import.meta.url), "utf8");
+const styles = fs.readFileSync(new URL("../src/app/pricing/pricing.module.css", import.meta.url), "utf8");
 
 const requiredCopy = [
   "SIMPLE PRICING, POWERFUL TOOLS",
@@ -30,6 +31,19 @@ if (!source.includes("https://tunapp.com/checkout?add-to-cart=13793")) {
 
 if (!source.includes("https://tunapp.com/checkout?add-to-cart=13794")) {
   throw new Error("Elite WooCommerce checkout URL changed or is missing");
+}
+
+const responsiveVisualRequirements = [
+  ["transform: translateY(-12px) scale(1.01);", "Premium card is not elevated on desktop"],
+  ["0 18px 48px rgba(93, 49, 216, .18)", "Premium card does not have the stronger featured shadow"],
+  ["padding-top: 24px;", "Pricing content is not spaced safely below the site header"],
+  [".premiumCard { transform: none; }", "Premium elevation is not reset for stacked tablet/mobile layouts"],
+];
+
+for (const [needle, message] of responsiveVisualRequirements) {
+  if (!styles.includes(needle)) {
+    throw new Error(message);
+  }
 }
 
 console.log("Pricing page redesign checks passed.");
