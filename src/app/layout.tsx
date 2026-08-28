@@ -7,8 +7,6 @@ import "./responsive-navigation.css";
 import "./mobile-user-polish.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const favicon32 = "https://tunapp.com/wp-content/uploads/2020/09/cropped-Tun_Site-Icon-32x32.png";
-const favicon192 = "https://tunapp.com/wp-content/uploads/2020/09/cropped-Tun_Site-Icon-192x192.png";
 const appleIcon = "https://tunapp.com/wp-content/uploads/2020/09/cropped-Tun_Site-Icon-180x180.png";
 
 export const metadata: Metadata = {
@@ -18,11 +16,7 @@ export const metadata: Metadata = {
   applicationName: "Western Armenian Translator",
   robots: { index: true, follow: true },
   icons: {
-    icon: [
-      { url: favicon32, sizes: "32x32", type: "image/png" },
-      { url: favicon192, sizes: "192x192", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" }
-    ],
+    icon: [{ url: "/favicon-32.png", sizes: "32x32", type: "image/png" }],
     apple: [{ url: appleIcon, sizes: "180x180", type: "image/png" }]
   },
   openGraph: {
