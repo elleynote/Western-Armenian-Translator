@@ -11,8 +11,16 @@ for (const required of ["View plans", "Maybe later"]) {
   }
 }
 
-if (!source.includes("if (!user && locked && !systemDisabled)")) {
-  throw new Error("Guest locked premium features do not bypass the popup");
+for (const required of [
+  "!loading",
+  "!toggleLoading",
+  "!user",
+  "locked",
+  "!systemDisabled",
+]) {
+  if (!source.includes(required)) {
+    throw new Error(`Guest direct-pricing guard is missing: ${required}`);
+  }
 }
 
 if (!source.includes('href="/pricing"')) {
