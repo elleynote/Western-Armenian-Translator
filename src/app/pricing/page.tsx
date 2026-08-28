@@ -139,7 +139,7 @@ export default function PricingPage() {
             </ul>
 
             <div className={styles.cardFooter}>
-              <button className={`${styles.cta} ${styles.freeCta}`} disabled>Get started free</button>
+              <a href="/" className={`${styles.cta} ${styles.freeCta}`}>Get started free</a>
               <span className={styles.ctaNote}>No credit card required</span>
             </div>
           </article>
