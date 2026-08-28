@@ -27,7 +27,7 @@
   background: #f2effb;
   color: #6240d4;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: .045em;
 }
 
@@ -37,7 +37,7 @@
   font-size: clamp(42px, 4.25vw, 61px);
   line-height: 1.07;
   letter-spacing: -.04em;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .hero p {
@@ -89,7 +89,7 @@
   background: linear-gradient(90deg, #7145e6 0%, #6e43df 52%, #7547e9 100%);
   color: white;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: .035em;
 }
 
@@ -100,7 +100,7 @@
 .planKicker {
   margin-bottom: 14px;
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: .02em;
 }
 
@@ -114,7 +114,7 @@
   font-size: 29px;
   line-height: 1.05;
   letter-spacing: -.025em;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .description {
@@ -166,7 +166,7 @@
 .freeHighlight strong {
   color: var(--green);
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .freeHighlight span {
@@ -186,7 +186,7 @@
   font-size: 42px;
   line-height: 1;
   letter-spacing: -.035em;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .price span {
@@ -243,7 +243,7 @@
 
 .featureList strong {
   color: #273143;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .featureList small {
@@ -276,9 +276,13 @@
 .cta {
   width: 100%;
   min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }
@@ -366,7 +370,7 @@
   color: #172033;
   font-size: 15px;
   line-height: 1.2;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .benefitItem p {
