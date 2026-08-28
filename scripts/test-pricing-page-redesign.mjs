@@ -33,6 +33,14 @@ if (!source.includes("https://tunapp.com/checkout?add-to-cart=13794")) {
   throw new Error("Elite WooCommerce checkout URL changed or is missing");
 }
 
+if (!source.includes('href="/"') || !source.includes("Get started free")) {
+  throw new Error("Free plan CTA must link back to the translator home page");
+}
+
+if (/font-weight:\s*(?:800|900)\s*;/u.test(styles)) {
+  throw new Error("Pricing bold typography must not exceed font-weight 700");
+}
+
 const responsiveVisualRequirements = [
   ["transform: translateY(-12px) scale(1.01);", "Premium card is not elevated on desktop"],
   ["0 18px 48px rgba(93, 49, 216, .18)", "Premium card does not have the stronger featured shadow"],
