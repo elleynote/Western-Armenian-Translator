@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AppProviders } from "@/components/AppProviders";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import "./globals.css";
 import "./responsive-polish.css";
 import "./responsive-navigation.css";
@@ -36,7 +37,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <link rel="preconnect" href="https://tunapp.com" />
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body><AppProviders>{children}</AppProviders></body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }
