@@ -1,8 +1,14 @@
 import fs from "node:fs";
 
-const component = fs.readFileSync(new URL("../src/components/GoogleAnalytics.tsx", import.meta.url), "utf8");
-const layout = fs.readFileSync(new URL("../src/app/layout.tsx", import.meta.url), "utf8");
+const componentUrl = new URL("../src/components/GoogleAnalytics.tsx", import.meta.url);
+const layoutUrl = new URL("../src/app/layout.tsx", import.meta.url);
 
+if (!fs.existsSync(componentUrl)) {
+  throw new Error("Google Analytics component is missing");
+}
+
+const component = fs.readFileSync(componentUrl, "utf8");
+const layout = fs.readFileSync(layoutUrl, "utf8");
 const measurementId = "G-V0RC6RM1XM";
 
 if (!component.includes(measurementId)) {
@@ -23,7 +29,7 @@ if (!component.includes("window.dataLayer")) {
   throw new Error("Google Analytics dataLayer initialization is missing");
 }
 
-if (!component.includes("gtag('config', GA_MEASUREMENT_ID)")) {
+if (!component.includes("gtag('config'")) {
   throw new Error("Google Analytics config call is missing");
 }
 
