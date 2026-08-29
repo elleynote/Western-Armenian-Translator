@@ -55,10 +55,14 @@ export function Header() {
     <>
       <div className="brand-strip">
         <div className="shell brand-strip-inner">
-          <span>Western Armenian language technology by Tun</span>
-          <span className="brand-strip-note">
-            English · Western Armenian · Eastern Armenian
-          </span>
+          <a
+            className="brand-strip-link"
+            href="https://tunapp.com/get-started/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Try 4 Armenian lessons for $1 →
+          </a>
         </div>
       </div>
 
