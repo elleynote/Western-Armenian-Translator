@@ -5,7 +5,7 @@ const cssPath = "src/components/Footer.module.css";
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
-  "/armenian-footer-landscape.jpeg",
+  "data:image/jpeg;base64",
   "footer-landscape-banner",
   "footer-landscape-image",
 ]) {
@@ -25,8 +25,10 @@ for (const required of [
   }
 }
 
-if (!fs.existsSync("public/armenian-footer-landscape.jpeg")) {
-  throw new Error("Footer landscape image asset is missing");
+for (let index = 1; index <= 5; index += 1) {
+  if (!fs.existsSync(`src/components/footerLandscapeImage${index}.ts`)) {
+    throw new Error(`Footer landscape image source chunk ${index} is missing`);
+  }
 }
 
 console.log("Footer landscape banner checks passed.");
