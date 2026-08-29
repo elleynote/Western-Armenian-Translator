@@ -1,7 +1,8 @@
 import fs from "node:fs";
 
 const footer = fs.readFileSync("src/components/Footer.tsx", "utf8");
-const css = fs.readFileSync("src/app/globals.css", "utf8");
+const cssPath = "src/components/Footer.module.css";
+const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
   "/armenian-footer-landscape.jpeg",
@@ -14,8 +15,8 @@ for (const required of [
 }
 
 for (const required of [
-  ".footer-landscape-banner",
-  ".footer-landscape-image",
+  ".banner",
+  ".image",
   "width: 100%",
   "height: auto",
 ]) {
