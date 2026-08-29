@@ -7,8 +7,24 @@ const source = fs.readFileSync(
 
 for (const required of ["View plans", "Maybe later"]) {
   if (!source.includes(required)) {
-    throw new Error(`Premium popup missing required action: ${required}`);
+    throw new Error(`Authenticated premium popup missing required action: ${required}`);
   }
+}
+
+for (const required of [
+  "!loading",
+  "!toggleLoading",
+  "!user",
+  "locked",
+  "!systemDisabled",
+]) {
+  if (!source.includes(required)) {
+    throw new Error(`Guest direct-pricing guard is missing: ${required}`);
+  }
+}
+
+if (!source.includes('href="/pricing"')) {
+  throw new Error("Guest locked premium features do not link directly to pricing");
 }
 
 for (const forbidden of [
@@ -17,8 +33,8 @@ for (const forbidden of [
   "Create an account or log in to continue.",
 ]) {
   if (source.includes(forbidden)) {
-    throw new Error(`Premium popup still includes legacy guest action/copy: ${forbidden}`);
+    throw new Error(`Premium flow still includes legacy guest action/copy: ${forbidden}`);
   }
 }
 
-console.log("Premium popup action checks passed.");
+console.log("Premium paid-link behavior checks passed.");

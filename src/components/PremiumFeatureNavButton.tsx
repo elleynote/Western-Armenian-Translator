@@ -217,6 +217,30 @@ export function PremiumFeatureNavButton({
     );
   }
 
+  if (
+    !loading &&
+    !toggleLoading &&
+    !user &&
+    locked &&
+    !systemDisabled
+  ) {
+    return (
+      <Link
+        href="/pricing"
+        className={controlClassName}
+      >
+        <span>{label}</span>
+        <span
+          className="premium-nav-lock"
+          aria-label="Paid feature"
+          title="Paid feature"
+        >
+          {"\uD83D\uDD12"}
+        </span>
+      </Link>
+    );
+  }
+
   return (
     <>
       <button
