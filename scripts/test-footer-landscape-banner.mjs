@@ -5,7 +5,7 @@ const cssPath = "src/components/Footer.module.css";
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
-  "data:image/jpeg;base64",
+  "data:image/webp;base64",
   "footer-landscape-banner",
   "footer-landscape-image",
 ]) {
@@ -25,10 +25,8 @@ for (const required of [
   }
 }
 
-for (let index = 1; index <= 5; index += 1) {
-  if (!fs.existsSync(`src/components/footerLandscapeImage${index}.ts`)) {
-    throw new Error(`Footer landscape image source chunk ${index} is missing`);
-  }
+if (!fs.existsSync("src/components/footerLandscapeImage.ts")) {
+  throw new Error("Footer landscape image source is missing");
 }
 
 console.log("Footer landscape banner checks passed.");
