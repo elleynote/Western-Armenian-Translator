@@ -130,9 +130,12 @@ export function Header() {
             )}
 
             {user && (
-              <Link href="/dashboard" className={navClass("/dashboard")}>
-                Dashboard
-              </Link>
+              <>
+                <Link href="/dashboard" className={navClass("/dashboard")}>
+                  Dashboard
+                </Link>
+                <a href="https://tunapp.com/my-account/" className="nav-link">Account</a>
+              </>
             )}
 
             {isEditor && (
