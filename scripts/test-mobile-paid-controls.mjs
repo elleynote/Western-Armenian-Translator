@@ -12,6 +12,10 @@ if (/disabled=\{\s*locked\s*\|\|/.test(voice)) {
   throw new Error("Voice speed must not be disabled only because audio is locked");
 }
 
+if (!voice.includes("(!locked &&")) {
+  throw new Error("Locked voice button must remain clickable even when there is no translated text");
+}
+
 if (!premium.includes("locked &&\n    !systemDisabled") || !premium.includes('href="/pricing"')) {
   throw new Error("Locked premium controls must route directly to pricing");
 }
