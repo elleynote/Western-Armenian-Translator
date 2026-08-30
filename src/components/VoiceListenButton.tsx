@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useEffect,
   useRef,
@@ -72,6 +73,7 @@ export function VoiceListenButton({
   mode = "natural",
   defaultSpeed = 1,
 }: VoiceListenButtonProps) {
+  const router = useRouter();
   const {
     user,
     profile,
@@ -234,7 +236,7 @@ export function VoiceListenButton({
 
   async function listen() {
     if (!hasPaidVoiceAccess) {
-      setUpgradeOpen(true);
+      router.push("/pricing");
       return;
     }
 
@@ -464,7 +466,7 @@ export function VoiceListenButton({
           }
           onClick={() => {
             if (locked) {
-              setUpgradeOpen(true);
+              router.push("/pricing");
               return;
             }
 
@@ -509,7 +511,6 @@ export function VoiceListenButton({
           }
           value={speed}
           disabled={
-            locked ||
             authLoading ||
             state === "loading"
           }
@@ -522,7 +523,7 @@ export function VoiceListenButton({
           }
           title={
             locked
-              ? "Audio is available to paid users"
+              ? "Choose playback speed. Audio playback requires a paid plan."
               : "Voice speed"
           }
         >
