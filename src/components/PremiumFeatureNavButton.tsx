@@ -220,7 +220,6 @@ export function PremiumFeatureNavButton({
   if (
     !loading &&
     !toggleLoading &&
-    !user &&
     locked &&
     !systemDisabled
   ) {
