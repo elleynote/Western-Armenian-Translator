@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useEffect,
   useRef,
@@ -72,6 +72,7 @@ export function VoiceListenButton({
   mode = "natural",
   defaultSpeed = 1,
 }: VoiceListenButtonProps) {
+  const router = useRouter();
   const {
     user,
     profile,
@@ -115,11 +116,6 @@ export function VoiceListenButton({
     error,
     setError,
   ] = useState("");
-
-  const [
-    upgradeOpen,
-    setUpgradeOpen,
-  ] = useState(false);
 
   const controllerRef =
     useRef<AbortController | null>(
@@ -206,35 +202,9 @@ export function VoiceListenButton({
     };
   }, [text]);
 
-  useEffect(() => {
-    if (!upgradeOpen) {
-      return;
-    }
-
-    const keyDown = (
-      event: KeyboardEvent,
-    ) => {
-      if (event.key === "Escape") {
-        setUpgradeOpen(false);
-      }
-    };
-
-    window.addEventListener(
-      "keydown",
-      keyDown,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        keyDown,
-      );
-    };
-  }, [upgradeOpen]);
-
   async function listen() {
     if (!hasPaidVoiceAccess) {
-      setUpgradeOpen(true);
+      router.push("/pricing");
       return;
     }
 
@@ -446,205 +416,100 @@ export function VoiceListenButton({
       : "Audio";
 
   return (
-    <>
-      <span
-        className={`voice-listen-control ${
-          compact
-            ? "voice-listen-control-compact"
-            : ""
-        }`}
+    <span
+      className={`voice-listen-control ${
+        compact
+          ? "voice-listen-control-compact"
+          : ""
+      }`}
+    >
+      <button
+        type="button"
+        className="panel-action"
+        disabled={
+          authLoading ||
+          (!locked &&
+            (disabled || !text.trim()))
+        }
+        onClick={() => {
+          if (locked) {
+            router.push("/pricing");
+            return;
+          }
+
+          void listen();
+        }}
+        title={
+          locked
+            ? `${featureName} is available to paid users. View plans.`
+            : error ||
+              (
+                mode === "pronunciation"
+                  ? "Hear Western Armenian pronunciation from the Latin transliteration"
+                  : "Listen using an AI-generated voice"
+              )
+        }
       >
-        <button
-          type="button"
-          className="panel-action"
-          disabled={
-            disabled ||
-            authLoading ||
-            !text.trim()
-          }
-          onClick={() => {
-            if (locked) {
-              setUpgradeOpen(true);
-              return;
-            }
+        <span aria-hidden="true">
+          {locked
+            ? "\uD83D\uDD12"
+            : "\uD83D\uDD0A"}
+        </span>
 
-            void listen();
-          }}
-          title={
-            locked
-              ? `${featureName} is available to paid users`
-              : error ||
-                (
-                  mode === "pronunciation"
-                    ? "Hear Western Armenian pronunciation from the Latin transliteration"
-                    : "Listen using an AI-generated voice"
-                )
-          }
-        >
-          <span aria-hidden="true">
-            {locked
-              ? "\uD83D\uDD12"
-              : "\uD83D\uDD0A"}
-          </span>
+        <span>
+          {locked
+            ? label
+            : state === "loading"
+              ? "Preparing..."
+              : state === "playing"
+                ? "Stop"
+                : error
+                  ? "Try again"
+                  : label}
+        </span>
+      </button>
 
-          <span>
-            {locked
-              ? label
-              : state === "loading"
-                ? "Preparing..."
-                : state === "playing"
-                  ? "Stop"
-                  : error
-                    ? "Try again"
-                    : label}
-          </span>
-        </button>
+      <select
+        className="voice-speed-select"
+        aria-label={
+          mode === "pronunciation"
+            ? "Pronunciation speed"
+            : "Voice speed"
+        }
+        value={speed}
+        disabled={
+          authLoading ||
+          state === "loading"
+        }
+        onChange={(event) =>
+          setSpeed(
+            Number(
+              event.target.value,
+            ) as VoiceSpeed,
+          )
+        }
+        title={
+          locked
+            ? "Choose playback speed. Audio playback requires a paid plan."
+            : "Voice speed"
+        }
+      >
+        <option value="0.75">
+          0.75x
+        </option>
 
-        <select
-          className="voice-speed-select"
-          aria-label={
-            mode === "pronunciation"
-              ? "Pronunciation speed"
-              : "Voice speed"
-          }
-          value={speed}
-          disabled={
-            locked ||
-            authLoading ||
-            state === "loading"
-          }
-          onChange={(event) =>
-            setSpeed(
-              Number(
-                event.target.value,
-              ) as VoiceSpeed,
-            )
-          }
-          title={
-            locked
-              ? "Audio is available to paid users"
-              : "Voice speed"
-          }
-        >
-          <option value="0.75">
-            0.75x
-          </option>
+        <option value="1">
+          1x
+        </option>
 
-          <option value="1">
-            1x
-          </option>
+        <option value="1.25">
+          1.25x
+        </option>
 
-          <option value="1.25">
-            1.25x
-          </option>
-
-          <option value="1.5">
-            1.5x
-          </option>
-        </select>
-      </span>
-
-      {upgradeOpen && (
-        <div
-          className="upgrade-modal-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              setUpgradeOpen(false);
-            }
-          }}
-        >
-          <section
-            className="upgrade-modal premium-feature-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="voice-upgrade-title"
-            aria-describedby="voice-upgrade-description"
-          >
-            <button
-              type="button"
-              className="upgrade-modal-close"
-              aria-label="Close"
-              onClick={() =>
-                setUpgradeOpen(false)
-              }
-            >
-              {"\u00D7"}
-            </button>
-
-            <p className="eyebrow">
-              Paid feature
-            </p>
-
-            <h2 id="voice-upgrade-title">
-              Unlock {featureName}
-            </h2>
-
-            <p
-              id="voice-upgrade-description"
-              className="upgrade-modal-copy"
-            >
-              {mode === "pronunciation"
-                ? "Hear Western Armenian pronunciation from the Latin transliteration."
-                : "Listen to translated text using AI-generated audio."}
-            </p>
-
-            <ul className="upgrade-modal-features">
-              <li>
-                Available to paid users
-              </li>
-
-              <li>
-                Included with Person and
-                Schools access
-              </li>
-
-              <li>
-                Clear audio for Western
-                Armenian learning and
-                pronunciation
-              </li>
-            </ul>
-
-            <div className="upgrade-modal-actions">
-              <Link
-                href="/pricing"
-                className="primary-button upgrade-modal-primary"
-                onClick={() =>
-                  setUpgradeOpen(false)
-                }
-              >
-                View plans
-              </Link>
-
-              {!user ? (
-                <Link
-                  href="/login"
-                  className="upgrade-modal-secondary premium-modal-link"
-                  onClick={() =>
-                    setUpgradeOpen(false)
-                  }
-                >
-                  Log in
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="upgrade-modal-secondary"
-                  onClick={() =>
-                    setUpgradeOpen(false)
-                  }
-                >
-                  Maybe later
-                </button>
-              )}
-            </div>
-          </section>
-        </div>
-      )}
-    </>
+        <option value="1.5">
+          1.5x
+        </option>
+      </select>
+    </span>
   );
 }
