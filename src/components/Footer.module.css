@@ -6,7 +6,7 @@
 
 .curve {
   position: relative;
-  min-height: clamp(430px, 43vw, 640px);
+  min-height: clamp(300px, 30vw, 460px);
   overflow: hidden;
   background: #ffffff;
 }
@@ -15,21 +15,21 @@
   content: "";
   position: absolute;
   left: 50%;
-  top: 22px;
-  width: 200%;
-  height: 118%;
+  top: 24px;
+  width: 126%;
+  height: 100%;
   transform: translateX(-50%);
-  border-radius: 50% 50% 0 0 / 42% 42% 0 0;
+  border-radius: 50% 50% 0 0 / 24% 24% 0 0;
   background: #e9e9e9;
 }
 
 .artwork {
   position: absolute;
-  right: 2%;
+  right: 0;
   bottom: 0;
   z-index: 1;
   display: block;
-  width: min(78vw, 1200px);
+  width: min(100%, 1600px);
   height: auto;
   max-width: none;
   pointer-events: none;
@@ -57,19 +57,19 @@
 
 @media (max-width: 700px) {
   .curve {
-    min-height: clamp(300px, 90vw, 420px);
+    min-height: 240px;
   }
 
   .curve::before {
-    top: 24px;
-    width: 220%;
-    height: 118%;
-    border-radius: 50% 50% 0 0 / 38% 38% 0 0;
+    top: 20px;
+    width: 138%;
+    height: 100%;
+    border-radius: 50% 50% 0 0 / 24% 24% 0 0;
   }
 
   .artwork {
-    width: 165vw;
-    right: -2%;
+    width: 155vw;
+    right: -8%;
   }
 
   .footerBar {
