@@ -1,11 +1,84 @@
-.banner {
+.root {
   width: 100%;
   overflow: hidden;
   background: #ffffff;
 }
 
-.image {
+.curve {
+  position: relative;
+  min-height: clamp(390px, 42vw, 620px);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.curve::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: clamp(26px, 4vw, 64px);
+  width: 156%;
+  height: calc(100% + 180px);
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 23% 23% 0 0;
+  background: #e9e9e9;
+}
+
+.artwork {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
   display: block;
-  width: 100%;
+  width: min(100%, 1600px);
   height: auto;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.footerBar {
+  position: relative;
+  z-index: 2;
+  min-height: 82px;
+  display: grid;
+  place-items: center;
+  padding: 22px 24px;
+  background: #1f1f1f;
+  color: #aaa19b;
+  text-align: center;
+}
+
+.footerBar p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .curve {
+    min-height: clamp(300px, 92vw, 430px);
+  }
+
+  .curve::before {
+    top: 34px;
+    width: 230%;
+    height: calc(100% + 120px);
+    border-radius: 50% 50% 0 0 / 18% 18% 0 0;
+  }
+
+  .artwork {
+    width: 210vw;
+    right: 0;
+  }
+
+  .footerBar {
+    min-height: 76px;
+    padding: 20px 18px;
+  }
+
+  .footerBar p {
+    max-width: 340px;
+    font-size: 12px;
+  }
 }
