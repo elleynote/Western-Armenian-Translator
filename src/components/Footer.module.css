@@ -11,18 +11,6 @@
   background: #ffffff;
 }
 
-.curve::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 24px;
-  width: 110%;
-  height: 100%;
-  transform: translateX(-50%);
-  border-radius: 50% 50% 0 0 / 35% 35% 0 0;
-  background: #e9e9e9;
-}
-
 .artwork {
   position: absolute;
   right: 0;
@@ -32,6 +20,7 @@
   width: min(100%, 1600px);
   height: auto;
   max-width: none;
+  clip-path: ellipse(72% 100% at 50% 100%);
   pointer-events: none;
   user-select: none;
 }
@@ -60,16 +49,10 @@
     min-height: 240px;
   }
 
-  .curve::before {
-    top: 20px;
-    width: 116%;
-    height: 100%;
-    border-radius: 50% 50% 0 0 / 34% 34% 0 0;
-  }
-
   .artwork {
     width: 155vw;
     right: -8%;
+    clip-path: ellipse(82% 100% at 50% 100%);
   }
 
   .footerBar {
