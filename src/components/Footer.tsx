@@ -9,9 +9,7 @@ export function Footer() {
       >
         <img
           className={`${styles.artwork} tunapp-footer-artwork`}
-          src="/tun-footer-background-reference.png"
-          width="2048"
-          height="580"
+          src="https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png"
           alt=""
           loading="lazy"
         />
