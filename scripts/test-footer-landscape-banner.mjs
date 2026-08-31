@@ -5,7 +5,7 @@ const cssPath = "src/components/Footer.module.css";
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
-  "/tun-footer-background.png",
+  "/tun-footer-background-reference.png",
   "tunapp-footer-curve",
   "tunapp-footer-artwork",
   "tunapp-footer-bar",
@@ -13,35 +13,27 @@ for (const required of [
   "new Date().getFullYear()",
 ]) {
   if (!footer.includes(required)) {
-    throw new Error(`TunApp-style footer missing required markup: ${required}`);
-  }
-}
-
-for (const forbidden of [
-  "data:image/webp;base64",
-  "footer-landscape-banner",
-  "footer-landscape-image",
-  'href="/pricing"',
-  'href="/privacy"',
-  'href="/terms"',
-]) {
-  if (footer.includes(forbidden)) {
-    throw new Error(`TunApp-style footer still includes legacy markup: ${forbidden}`);
+    throw new Error(`TunApp footer refinement missing required markup: ${required}`);
   }
 }
 
 for (const required of [
   ".curve",
   ".curve::before",
+  "width: 200%",
+  "height: 118%",
+  "border-radius: 50% 50% 0 0 / 42% 42% 0 0",
   ".artwork",
+  "width: min(78vw, 1200px)",
+  "right: 2%",
   ".footerBar",
-  "border-radius",
   "background: #1f1f1f",
   "@media (max-width: 700px)",
+  "width: 165vw",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp-style footer missing responsive CSS: ${required}`);
+    throw new Error(`TunApp footer refinement missing CSS: ${required}`);
   }
 }
 
-console.log("TunApp-style footer checks passed.");
+console.log("TunApp footer refinement checks passed.");

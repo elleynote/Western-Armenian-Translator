@@ -9,9 +9,9 @@ export function Footer() {
       >
         <img
           className={`${styles.artwork} tunapp-footer-artwork`}
-          src="/tun-footer-background.png"
-          width="1200"
-          height="340"
+          src="/tun-footer-background-reference.png"
+          width="2048"
+          height="580"
           alt=""
           loading="lazy"
         />
