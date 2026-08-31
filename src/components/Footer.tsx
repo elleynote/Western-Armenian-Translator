@@ -7,12 +7,14 @@ export function Footer() {
         className={`${styles.curve} tunapp-footer-curve`}
         aria-hidden="true"
       >
-        <img
-          className={`${styles.artwork} tunapp-footer-artwork`}
-          src="https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png"
-          alt=""
-          loading="lazy"
-        />
+        <div className={`${styles.scene} tunapp-footer-scene`}>
+          <img
+            className={`${styles.artwork} tunapp-footer-artwork`}
+            src="https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png"
+            alt=""
+            loading="lazy"
+          />
+        </div>
       </div>
 
       <div className={`${styles.footerBar} tunapp-footer-bar`}>
