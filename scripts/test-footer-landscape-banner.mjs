@@ -5,7 +5,7 @@ const cssPath = "src/components/Footer.module.css";
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
-  "/tun-footer-background-reference.png",
+  "https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png",
   "tunapp-footer-curve",
   "tunapp-footer-artwork",
   "tunapp-footer-bar",
@@ -13,27 +13,27 @@ for (const required of [
   "new Date().getFullYear()",
 ]) {
   if (!footer.includes(required)) {
-    throw new Error(`TunApp footer refinement missing required markup: ${required}`);
+    throw new Error(`TunApp exact footer missing required markup: ${required}`);
   }
 }
 
 for (const required of [
   ".curve",
   ".curve::before",
-  "width: 200%",
-  "height: 118%",
-  "border-radius: 50% 50% 0 0 / 42% 42% 0 0",
+  "width: 126%",
+  "height: 100%",
+  "border-radius: 50% 50% 0 0 / 24% 24% 0 0",
   ".artwork",
-  "width: min(78vw, 1200px)",
-  "right: 2%",
+  "width: min(100%, 1600px)",
+  "right: 0",
   ".footerBar",
   "background: #1f1f1f",
   "@media (max-width: 700px)",
-  "width: 165vw",
+  "min-height: 240px",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp footer refinement missing CSS: ${required}`);
+    throw new Error(`TunApp exact footer missing CSS: ${required}`);
   }
 }
 
-console.log("TunApp footer refinement checks passed.");
+console.log("TunApp exact footer checks passed.");
