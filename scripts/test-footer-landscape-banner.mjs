@@ -19,6 +19,8 @@ for (const required of [
 }
 
 for (const required of [
+  ".root",
+  "padding-top: 32px",
   ".curve",
   ".scene",
   "clip-path: ellipse(72% 100% at 50% 100%)",
@@ -31,9 +33,10 @@ for (const required of [
   "@media (max-width: 700px)",
   "min-height: 240px",
   "clip-path: ellipse(82% 100% at 50% 100%)",
+  "padding-top: 24px",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp dome wrapper missing CSS: ${required}`);
+    throw new Error(`TunApp footer spacing missing CSS: ${required}`);
   }
 }
 
@@ -41,4 +44,4 @@ if (css.includes("clip-path: ellipse(72% 100% at 50% 100%);\n  pointer-events"))
   throw new Error("The artwork itself should not own the dome clip; the scene wrapper must own it");
 }
 
-console.log("TunApp footer dome wrapper checks passed.");
+console.log("TunApp footer spacing checks passed.");
