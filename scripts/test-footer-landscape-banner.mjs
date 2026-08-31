@@ -20,9 +20,9 @@ for (const required of [
 for (const required of [
   ".curve",
   ".curve::before",
-  "width: 126%",
+  "width: 110%",
   "height: 100%",
-  "border-radius: 50% 50% 0 0 / 24% 24% 0 0",
+  "border-radius: 50% 50% 0 0 / 35% 35% 0 0",
   ".artwork",
   "width: min(100%, 1600px)",
   "right: 0",
@@ -30,10 +30,12 @@ for (const required of [
   "background: #1f1f1f",
   "@media (max-width: 700px)",
   "min-height: 240px",
+  "width: 116%",
+  "border-radius: 50% 50% 0 0 / 34% 34% 0 0",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp exact footer missing CSS: ${required}`);
+    throw new Error(`TunApp final footer curve missing CSS: ${required}`);
   }
 }
 
-console.log("TunApp exact footer checks passed.");
+console.log("TunApp final footer curve checks passed.");
