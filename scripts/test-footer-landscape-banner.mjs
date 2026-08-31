@@ -19,23 +19,23 @@ for (const required of [
 
 for (const required of [
   ".curve",
-  ".curve::before",
-  "width: 110%",
-  "height: 100%",
-  "border-radius: 50% 50% 0 0 / 35% 35% 0 0",
   ".artwork",
   "width: min(100%, 1600px)",
   "right: 0",
+  "clip-path: ellipse(72% 100% at 50% 100%)",
   ".footerBar",
   "background: #1f1f1f",
   "@media (max-width: 700px)",
   "min-height: 240px",
-  "width: 116%",
-  "border-radius: 50% 50% 0 0 / 34% 34% 0 0",
+  "clip-path: ellipse(82% 100% at 50% 100%)",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp final footer curve missing CSS: ${required}`);
+    throw new Error(`TunApp visible dome missing CSS: ${required}`);
   }
 }
 
-console.log("TunApp final footer curve checks passed.");
+if (css.includes(".curve::before")) {
+  throw new Error("Hidden pseudo-element curve should be removed; the visible dome must clip the artwork itself");
+}
+
+console.log("TunApp visible footer dome checks passed.");
