@@ -18,6 +18,50 @@ for (const required of [
   }
 }
 
+const footerLinks = [
+  ["My Lessons", "https://tunapp.com/lessons"],
+  ["Learn Armenian Online", "https://tunapp.com/get-started"],
+  ["Courses, Flashcards and Workbooks", "https://tunapp.com/shop"],
+  ["Armenian Social Network", "https://armeniansocialnetwork.com"],
+  ["Western Armenian Tutors", "https://tunapp.com/western-armenian-tutoring"],
+  ["Armenian Translation Tool", "https://translatearmenian.com"],
+  ["Armenian Verb Conjugations", "https://armenianverbs.com"],
+  ["Armenian Keyboard", "https://armeniankeyboard.com"],
+  ["Armenian ChatGPT", "https://tunapp.com/chatbot"],
+  ["My Account", "https://tunapp.com/my-account/"],
+  ["Downloads", "https://tunapp.com/my-account/downloads/"],
+  ["Subscriptions", "https://tunapp.com/my-account/subscriptions/"],
+  ["Payment Methods", "https://tunapp.com/my-account/payment-methods/"],
+  ["Password Recovery", "https://tunapp.com/login/"],
+  ["Privacy Policy", "https://tunapp.com/privacy-policy/"],
+  ["Website Terms", "https://tunapp.com/website-terms/"],
+  ["Affiliate Program", "https://tunapp.com/ambassadors/"],
+  ["Blog", "https://tunapp.com/blog"],
+  ["Contact Us", "mailto:hello@tunapp.com"],
+];
+
+for (const heading of ["Learn", "Account", "Company"]) {
+  if (!footer.includes(`heading: "${heading}"`)) {
+    throw new Error(`TunApp footer missing column heading: ${heading}`);
+  }
+}
+
+for (const [label, href] of footerLinks) {
+  if (!footer.includes(`["${label}", "${href}"]`)) {
+    throw new Error(`TunApp footer missing link: ${label} -> ${href}`);
+  }
+}
+
+for (const required of [
+  'target="_blank"',
+  'rel="noopener noreferrer"',
+  "className={styles.footerLink}",
+]) {
+  if (!footer.includes(required)) {
+    throw new Error(`TunApp footer link template missing required markup: ${required}`);
+  }
+}
+
 for (const required of [
   ".root",
   "padding-top: 32px",
@@ -28,6 +72,13 @@ for (const required of [
   "right: 0",
   ".footerBar",
   "background: #1f1f1f",
+  ".footerContent",
+  ".footerLinks",
+  "grid-template-columns: repeat(3, minmax(0, 1fr))",
+  ".footerColumn",
+  ".footerHeading",
+  ".footerLink",
+  ".copyright",
   "@media (max-width: 700px)",
   "min-height: 240px",
   "padding-top: 24px",
@@ -56,4 +107,4 @@ if (css.includes("background: #ffffff;")) {
   throw new Error("TunApp footer should not force a white background");
 }
 
-console.log("TunApp footer image-only checks passed.");
+console.log("TunApp footer image and link-column checks passed.");
