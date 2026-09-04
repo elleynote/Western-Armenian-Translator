@@ -2,14 +2,14 @@
   width: 100%;
   overflow: hidden;
   padding-top: 32px;
-  background: #ffffff;
+  background: var(--background);
 }
 
 .curve {
   position: relative;
   min-height: clamp(300px, 30vw, 460px);
   overflow: hidden;
-  background: #ffffff;
+  background: var(--background);
 }
 
 .scene {
