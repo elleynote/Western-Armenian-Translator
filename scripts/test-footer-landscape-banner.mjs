@@ -47,4 +47,13 @@ for (const removed of [
   }
 }
 
+const pageBackgroundUses = css.match(/background: var\(--background\);/g) ?? [];
+if (pageBackgroundUses.length < 2) {
+  throw new Error("TunApp footer root and curve must use the shared page background");
+}
+
+if (css.includes("background: #ffffff;")) {
+  throw new Error("TunApp footer should not force a white background");
+}
+
 console.log("TunApp footer image-only checks passed.");
