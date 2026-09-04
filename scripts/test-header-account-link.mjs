@@ -23,7 +23,7 @@ if (
 }
 
 const rolePlayIndex = source.indexOf('label="Role-Play"');
-const learnArmenianIndex = source.indexOf('>Learn Armenian<');
+const learnArmenianIndex = source.indexOf('Learn Armenian');
 const pricingIndex = source.indexOf('href="/pricing"');
 
 if (learnArmenianIndex === -1 || !source.includes('href="https://tunapp.com/get-started/"')) {
