@@ -10,7 +10,7 @@ export function Footer() {
         <div className={`${styles.scene} tunapp-footer-scene`}>
           <img
             className={`${styles.artwork} tunapp-footer-artwork`}
-            src="https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png"
+            src=src="https://tunapp.com/wp-content/uploads/2026/09/Tun-Footer-Translate__.png"
             alt=""
             loading="lazy"
           />
