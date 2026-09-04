@@ -41,30 +41,24 @@ const footerLinks = [
 ];
 
 for (const heading of ["Learn", "Account", "Company"]) {
-  if (!footer.includes(`>${heading}<`)) {
+  if (!footer.includes(`heading: "${heading}"`)) {
     throw new Error(`TunApp footer missing column heading: ${heading}`);
   }
 }
 
 for (const [label, href] of footerLinks) {
-  const anchorStart = footer.indexOf(`href="${href}"`);
-  if (anchorStart === -1) {
-    throw new Error(`TunApp footer missing link URL: ${href}`);
+  if (!footer.includes(`["${label}", "${href}"]`)) {
+    throw new Error(`TunApp footer missing link: ${label} -> ${href}`);
   }
+}
 
-  const anchorEnd = footer.indexOf("</a>", anchorStart);
-  const anchorMarkup = footer.slice(anchorStart, anchorEnd + 4);
-
-  if (!anchorMarkup.includes(label)) {
-    throw new Error(`TunApp footer missing link label: ${label}`);
-  }
-
-  if (!anchorMarkup.includes('target="_blank"')) {
-    throw new Error(`TunApp footer link must open in a new tab: ${label}`);
-  }
-
-  if (!anchorMarkup.includes('rel="noopener noreferrer"')) {
-    throw new Error(`TunApp footer link must include safe rel attributes: ${label}`);
+for (const required of [
+  'target="_blank"',
+  'rel="noopener noreferrer"',
+  "className={styles.footerLink}",
+]) {
+  if (!footer.includes(required)) {
+    throw new Error(`TunApp footer link template missing required markup: ${required}`);
   }
 }
 
