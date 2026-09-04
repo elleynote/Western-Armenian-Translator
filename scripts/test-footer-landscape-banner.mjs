@@ -5,7 +5,7 @@ const cssPath = "src/components/Footer.module.css";
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
 
 for (const required of [
-  "https://tunapp.com/wp-content/uploads/2020/09/Tun-App_Footer_Shiraz.png",
+  "https://tunapp.com/wp-content/uploads/2026/09/Tun-Footer-Translate__.png",
   "tunapp-footer-curve",
   "tunapp-footer-scene",
   "tunapp-footer-artwork",
@@ -14,7 +14,7 @@ for (const required of [
   "new Date().getFullYear()",
 ]) {
   if (!footer.includes(required)) {
-    throw new Error(`TunApp dome wrapper missing required markup: ${required}`);
+    throw new Error(`TunApp footer missing required markup: ${required}`);
   }
 }
 
@@ -23,8 +23,6 @@ for (const required of [
   "padding-top: 32px",
   ".curve",
   ".scene",
-  "clip-path: ellipse(72% 100% at 50% 100%)",
-  "background: #e9e9e9",
   ".artwork",
   "width: min(100%, 1600px)",
   "right: 0",
@@ -32,16 +30,30 @@ for (const required of [
   "background: #1f1f1f",
   "@media (max-width: 700px)",
   "min-height: 240px",
-  "clip-path: ellipse(82% 100% at 50% 100%)",
   "padding-top: 24px",
 ]) {
   if (!css.includes(required)) {
-    throw new Error(`TunApp footer spacing missing CSS: ${required}`);
+    throw new Error(`TunApp footer styling missing CSS: ${required}`);
   }
 }
 
-if (css.includes("clip-path: ellipse(72% 100% at 50% 100%);\n  pointer-events")) {
-  throw new Error("The artwork itself should not own the dome clip; the scene wrapper must own it");
+for (const removed of [
+  "clip-path: ellipse(72% 100% at 50% 100%)",
+  "clip-path: ellipse(82% 100% at 50% 100%)",
+  "background: #e9e9e9",
+]) {
+  if (css.includes(removed)) {
+    throw new Error(`TunApp footer should not include the old curved gray scene: ${removed}`);
+  }
 }
 
-console.log("TunApp footer spacing checks passed.");
+const pageBackgroundUses = css.match(/background: var\(--background\);/g) ?? [];
+if (pageBackgroundUses.length < 2) {
+  throw new Error("TunApp footer root and curve must use the shared page background");
+}
+
+if (css.includes("background: #ffffff;")) {
+  throw new Error("TunApp footer should not force a white background");
+}
+
+console.log("TunApp footer image-only checks passed.");
