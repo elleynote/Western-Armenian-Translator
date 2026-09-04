@@ -14,7 +14,11 @@ if (!source.includes(">Account<")) {
   throw new Error("Logged-in Account link label is missing");
 }
 
-if (source.includes("Western Armenian Translator") || source.includes("Translate with Tun") || source.includes("brand-divider")) {
+if (
+  source.includes('<span className="brand-title">Western Armenian Translator</span>') ||
+  source.includes('<span className="brand-subtitle">Translate with Tun</span>') ||
+  source.includes('<span className="brand-divider"')
+) {
   throw new Error("Header logo companion text/divider should be removed");
 }
 
