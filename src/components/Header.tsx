@@ -83,13 +83,6 @@ export function Header() {
                 fetchPriority="high"
               />
             </Link>
-
-            <span className="brand-divider" aria-hidden="true" />
-
-            <div className="brand-copy">
-              <span className="brand-title">Western Armenian Translator</span>
-              <span className="brand-subtitle">Translate with Tun</span>
-            </div>
           </div>
 
           <nav
@@ -126,6 +119,10 @@ export function Header() {
               href="/role-play"
               className={`${navClass("/role-play")} premium-feature-nav-link`}
             />
+
+            <a href="https://tunapp.com/get-started/" className="nav-link">
+              Learn Armenian
+            </a>
 
             {!user && (
               <Link href="/pricing" className={navClass("/pricing")}>
