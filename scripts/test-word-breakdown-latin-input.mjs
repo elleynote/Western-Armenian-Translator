@@ -54,7 +54,7 @@ assert.match(
 
 assert.match(
   edge,
-  /const analysisText[\s\S]*ARMENIAN_SCRIPT_PATTERN/u,
+  /const hasArmenianScript[\s\S]*ARMENIAN_SCRIPT_PATTERN[\s\S]*let analysisText\s*=\s*text[\s\S]*if \(!hasArmenianScript\)/u,
   "Word Breakdown should preserve Armenian-script input and only normalize Latin input.",
 );
 
