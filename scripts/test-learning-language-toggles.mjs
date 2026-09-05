@@ -78,8 +78,13 @@ assert.match(
 );
 assert.match(
   rolePlayFunction,
-  /conversationLanguage:/u,
-  "Role-Play sessions should persist conversation language in existing metadata.",
+  /session\.metadata[\s\S]*conversationLanguage/u,
+  "Role-Play should read the active conversation language from persisted session metadata.",
+);
+assert.match(
+  rolePlayFunction,
+  /metadata:\s*\{[\s\S]*conversationLanguage,/u,
+  "Role-Play should persist the chosen conversation language in existing session metadata.",
 );
 assert.match(
   rolePlayFunction,
