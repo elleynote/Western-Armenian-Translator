@@ -80,6 +80,42 @@
   color: #ffffff;
 }
 
+.socialLinks {
+  display: flex !important;
+  align-items: center;
+  gap: 12px !important;
+  margin-top: 18px;
+}
+
+.socialLink {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #aaa19b;
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+
+.socialLink:hover {
+  color: #ffffff;
+}
+
+.socialLink svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.socialLink svg path {
+  fill: currentColor;
+  stroke: none;
+}
+
 .copyright {
   margin: 34px 0 0;
   padding-top: 18px;
@@ -121,6 +157,10 @@
 
   .footerLink {
     font-size: 12px;
+  }
+
+  .socialLinks {
+    margin-top: 16px;
   }
 
   .copyright {
