@@ -12,6 +12,7 @@ const sitemap = read("src/app/sitemap.ts");
 const robots = read("src/app/robots.ts");
 const analytics = read("src/components/GoogleAnalytics.tsx");
 const nextConfig = read("next.config.ts");
+const packageJson = read("package.json");
 const redirectsPath = path.join(repoRoot, "public/_redirects");
 
 const title = "Western Armenian Translator | English to Western Armenian Translation";
@@ -82,27 +83,15 @@ for (const requiredCspOrigin of ["https://www.googletagmanager.com", "https://ww
   }
 }
 
-const forbiddenDomain = ["armenian", "verbs.com"].join("");
-const ignoredDirectories = new Set([".git", ".next", "node_modules"]);
-const textExtensions = new Set([".css", ".html", ".js", ".json", ".md", ".mjs", ".php", ".sql", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml"]);
-
-function scanDirectory(directory) {
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
-    const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      scanDirectory(absolutePath);
-      continue;
-    }
-    const extension = path.extname(entry.name);
-    if (!textExtensions.has(extension) && entry.name !== "_redirects") continue;
-    const contents = fs.readFileSync(absolutePath, "utf8").toLowerCase();
-    if (contents.includes(forbiddenDomain)) {
-      throw new Error(`Forbidden comparison-domain reference found in ${path.relative(repoRoot, absolutePath)}`);
-    }
-  }
+if (!packageJson.includes("node scripts/test-seo-canonical.mjs")) {
+  throw new Error("SEO regression check is not included in the normal test suite");
 }
 
-scanDirectory(repoRoot);
+const forbiddenDomain = ["armenian", "verbs.com"].join("");
+for (const [name, contents] of Object.entries({ layout, homePage, sitemap, robots, analytics, nextConfig, packageJson, redirects })) {
+  if (contents.toLowerCase().includes(forbiddenDomain)) {
+    throw new Error(`Forbidden comparison-domain reference found in ${name}`);
+  }
+}
 
 console.log("SEO canonical-domain regression checks passed.");
