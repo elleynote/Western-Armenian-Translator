@@ -4,8 +4,10 @@ import { latinToWesternArmenian } from "../src/lib/western-armenian-input.ts";
 
 assert.equal(transliterateWesternArmenian("ես կը սիրեմ"), "yes gë sirem");
 assert.equal(transliterateWesternArmenian("Ես կը սիրեմ"), "Yes gë sirem");
-assert.equal(transliterateWesternArmenian("բարեւ, ես լաւ եմ"), "parev, es lav yem");
-assert.equal(transliterateWesternArmenian("բարեւ։ ես լաւ եմ"), "parev։ yes lav yem");
+assert.equal(transliterateWesternArmenian("բարեւ, ես լաւ եմ"), "parev, es lav em");
+assert.equal(transliterateWesternArmenian("բարեւ։ ես լաւ եմ"), "parev։ yes lav em");
+assert.equal(transliterateWesternArmenian("եմ"), "em");
+assert.equal(transliterateWesternArmenian("Ես եմ"), "Yes em");
 assert.equal(transliterateWesternArmenian("եկեղեցի"), "yegeghets'i");
 assert.equal(transliterateWesternArmenian("մեր"), "mer");
 assert.equal(transliterateWesternArmenian("որ"), "vor");
