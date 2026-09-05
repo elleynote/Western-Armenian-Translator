@@ -6,6 +6,7 @@ on:
       - feature/word-breakdown-latin-input
     paths:
       - .github/workflows/one-time-word-breakdown-latin-input.yml
+      - scripts/test-word-breakdown-latin-input.mjs
 
 permissions:
   contents: write
