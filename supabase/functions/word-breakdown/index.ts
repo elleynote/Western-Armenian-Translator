@@ -726,13 +726,13 @@ ${languageRequirements}
 
 Breakdown requirements:
 - "naturalMeaning" is a concise natural English meaning of the complete input.
-- "literalMeaning" is the learner-facing built or compositional meaning when the input is a transparent compound, derived word, or expression whose parts reveal how the meaning is formed.
+- "literalMeaning" is the learner-facing built or compositional meaning when the input is a transparent compound, derived word, or expression whose parts reveal how the meaning is formed. For example, if a word naturally means "vacuum cleaner" but its confident components literally amount to something like "dust sucker", naturalMeaning should be "vacuum cleaner" and literalMeaning should explain the "dust sucker" construction.
 - For transparent compounds, do not simply repeat naturalMeaning in literalMeaning. Identify the meanings contributed by the real Armenian components and combine them into concise literal English only when you are confident in the morphology.
 - If the input is not transparently compositional, or the component analysis is uncertain, use an empty literalMeaning rather than guessing.
 - "words" must follow the same order as the ${languageName} input.
 - Each "text" value must be an exact word or meaningful grammatical segment found in the input. Do not replace it with a corrected spelling.
 - Do not create separate entries for punctuation alone.
-- "meaning" explains that word or segment in the context of this sentence.
+- "meaning" explains that word or segment in the context of this sentence. For a transparent compound entered as one word, the meaning may also briefly state its confident internal construction after the natural meaning, such as "vacuum cleaner; literally dust + sucker", without inventing unattested components.
 - "partOfSpeech" is a short English grammatical label such as noun, verb, adjective, adverb, pronoun, preposition, conjunction, article, particle, auxiliary, or phrase. Leave empty if uncertain.
 - "baseForm" must be the true dictionary/headword form only when you are confident. Otherwise return an empty string.
 - ${baseFormRule}
