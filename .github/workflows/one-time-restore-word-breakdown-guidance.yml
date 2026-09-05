@@ -1,0 +1,52 @@
+name: One-time restore Word Breakdown guidance
+
+on:
+  push:
+    branches:
+      - feature/role-play-word-breakdown-language-toggles
+    paths:
+      - .github/workflows/one-time-restore-word-breakdown-guidance.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/role-play-word-breakdown-language-toggles
+          fetch-depth: 0
+
+      - name: Restore unchanged guidance detail
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("supabase/functions/word-breakdown/index.ts")
+          text = path.read_text()
+
+          replacements = {
+            '- "literalMeaning" is the learner-facing built or compositional meaning when the input is a transparent compound, derived word, or expression whose parts reveal how the meaning is formed.': '- "literalMeaning" is the learner-facing built or compositional meaning when the input is a transparent compound, derived word, or expression whose parts reveal how the meaning is formed. For example, if a word naturally means "vacuum cleaner" but its confident components literally amount to something like "dust sucker", naturalMeaning should be "vacuum cleaner" and literalMeaning should explain the "dust sucker" construction.',
+            '- "meaning" explains that word or segment in the context of this sentence.': '- "meaning" explains that word or segment in the context of this sentence. For a transparent compound entered as one word, the meaning may also briefly state its confident internal construction after the natural meaning, such as "vacuum cleaner; literally dust + sucker", without inventing unattested components.',
+          }
+
+          for old, new in replacements.items():
+              assert text.count(old) == 1, (old, text.count(old))
+              text = text.replace(old, new)
+
+          path.write_text(text)
+          Path(".github/workflows/one-time-restore-word-breakdown-guidance.yml").unlink()
+          PY
+
+      - name: Commit focused restoration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "fix: preserve word breakdown compound guidance"
+          git push origin HEAD:feature/role-play-word-breakdown-language-toggles
