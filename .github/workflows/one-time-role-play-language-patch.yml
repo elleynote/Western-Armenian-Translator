@@ -26,17 +26,81 @@ jobs:
         with:
           node-version: 22
 
-      - name: Repair patch script parser escape
+      - name: Repair patch script assertions
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
           path = Path("scripts/apply-role-play-language-patch.mjs")
           text = path.read_text()
-          old = r"\n}\n\n\nfunction nextInteractionMode"
-          new = r"\n\}\n\n\nfunction nextInteractionMode"
-          assert text.count(old) == 1
-          path.write_text(text.replace(old, new))
+
+          parser_old = r"\n}\n\n\nfunction nextInteractionMode"
+          parser_new = r"\n\}\n\n\nfunction nextInteractionMode"
+          assert text.count(parser_old) == 1
+          text = text.replace(parser_old, parser_new)
+
+          scope_old = r'''    const openingOccurrences =
+                next.match(
+                  /scenario\s*\.opening_message/gu,
+                ) ?? [];
+
+              assert.equal(
+                openingOccurrences.length,
+                2,
+                `start opening message replacements: expected 2, found ${openingOccurrences.length}`,
+              );
+
+              next = next.replace(
+                /scenario\s*\.opening_message/gu,
+                "openingMessage",
+              );'''
+
+          scope_new = r'''    const sessionWriteIndex =
+                next.indexOf(
+                  "      const sessionResult =",
+                );
+
+              assert.notEqual(
+                sessionWriteIndex,
+                -1,
+                "start opening message replacements: session write marker missing",
+              );
+
+              const beforeSessionWrite =
+                next.slice(
+                  0,
+                  sessionWriteIndex,
+                );
+
+              let sessionWrite =
+                next.slice(
+                  sessionWriteIndex,
+                );
+
+              const openingOccurrences =
+                sessionWrite.match(
+                  /scenario\s*\.opening_message/gu,
+                ) ?? [];
+
+              assert.equal(
+                openingOccurrences.length,
+                2,
+                `start opening message replacements: expected 2 session-write references, found ${openingOccurrences.length}`,
+              );
+
+              sessionWrite =
+                sessionWrite.replace(
+                  /scenario\s*\.opening_message/gu,
+                  "openingMessage",
+                );
+
+              next =
+                beforeSessionWrite +
+                sessionWrite;'''
+
+          assert text.count(scope_old) == 1
+          text = text.replace(scope_old, scope_new)
+          path.write_text(text)
           PY
           node --check scripts/apply-role-play-language-patch.mjs
 
