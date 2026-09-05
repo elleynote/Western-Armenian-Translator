@@ -17,10 +17,10 @@ interface RecentTranslation {
 }
 
 const EXAMPLES = [
-  { label: "Parev tsez (Hello)", text: "Hello" },
+  { label: "Parev (Hello)", text: "Hello" },
   { label: "Shnorhakalutyun (Thank you)", text: "Thank you" },
   { label: "Inch'pes es? (How are you?)", text: "How are you?" },
-  { label: "Yes (Yes)", text: "Yes" },
+  { label: "Yes (Ayo)", text: "Yes" },
   { label: "Voch (No)", text: "No" },
 ] as const;
 
@@ -215,6 +215,7 @@ export function HomeTranslatorExperience() {
                 description="Find Western Armenian synonyms, antonyms and related words."
                 href="/thesaurus"
                 className={styles.learningTool}
+                showDescription
               />
 
               <button type="button" className={styles.learningTool} onClick={clickTextToSpeech} disabled={!translationReady}>
@@ -229,6 +230,7 @@ export function HomeTranslatorExperience() {
                 description="Explore word-by-word meaning, structure and grammar."
                 href="/word-breakdown"
                 className={styles.learningTool}
+                showDescription
               />
             </div>
           </section>

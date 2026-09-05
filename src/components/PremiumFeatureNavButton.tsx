@@ -28,6 +28,7 @@ interface PremiumFeatureNavButtonProps {
   className?: string;
   onActivate?: () => void;
   disabled?: boolean;
+  showDescription?: boolean;
 }
 
 const FEATURE_BULLETS:
@@ -91,6 +92,7 @@ export function PremiumFeatureNavButton({
   className,
   onActivate,
   disabled = false,
+  showDescription = false,
 }: PremiumFeatureNavButtonProps) {
   const {
     user,
@@ -146,6 +148,33 @@ export function PremiumFeatureNavButton({
     className ??
     "nav-link premium-feature-nav-link";
 
+  const controlContent = (
+    includeLock: boolean,
+  ) => (
+    <>
+      {showDescription ? (
+        <span className="premium-feature-copy">
+          <strong>{label}</strong>
+          <small className="premium-feature-description">
+            {description}
+          </small>
+        </span>
+      ) : (
+        <span>{label}</span>
+      )}
+
+      {includeLock ? (
+        <span
+          className="premium-nav-lock"
+          aria-label="Paid feature"
+          title="Paid feature"
+        >
+          {"\uD83D\uDD12"}
+        </span>
+      ) : null}
+    </>
+  );
+
   useEffect(() => {
     if (!open) {
       return;
@@ -195,7 +224,7 @@ export function PremiumFeatureNavButton({
           onActivate
         }
       >
-        {label}
+        {controlContent(false)}
       </button>
     );
   }
@@ -212,7 +241,7 @@ export function PremiumFeatureNavButton({
           controlClassName
         }
       >
-        {label}
+        {controlContent(false)}
       </Link>
     );
   }
@@ -228,14 +257,7 @@ export function PremiumFeatureNavButton({
         href="/pricing"
         className={controlClassName}
       >
-        <span>{label}</span>
-        <span
-          className="premium-nav-lock"
-          aria-label="Paid feature"
-          title="Paid feature"
-        >
-          {"\uD83D\uDD12"}
-        </span>
+        {controlContent(true)}
       </Link>
     );
   }
@@ -255,19 +277,9 @@ export function PremiumFeatureNavButton({
           setOpen(true)
         }
       >
-        <span>
-          {label}
-        </span>
-
-        {locked && !systemDisabled ? (
-          <span
-            className="premium-nav-lock"
-            aria-label="Paid feature"
-            title="Paid feature"
-          >
-            {"\uD83D\uDD12"}
-          </span>
-        ) : null}
+        {controlContent(
+          locked && !systemDisabled,
+        )}
       </button>
 
       {open ? (
