@@ -20,6 +20,10 @@ export type RolePlaySessionStatus =
   | "completed"
   | "abandoned";
 
+export type RolePlayConversationLanguage =
+  | "hyw"
+  | "hye";
+
 export type RolePlayDifficulty =
   | "beginner"
   | "intermediate"
@@ -81,6 +85,7 @@ export interface RolePlaySession {
   scenarioTitle: string;
   status: RolePlaySessionStatus;
   interactionMode: RolePlayInteractionMode;
+  conversationLanguage: RolePlayConversationLanguage;
   messageCount: number;
   startedAt?: string;
   lastActivityAt: string;
@@ -135,6 +140,14 @@ export interface RolePlayMessageResult {
   knowledgeUsed: RolePlayKnowledgeUsed;
   userTurn: RolePlayTurn;
   assistantTurn: RolePlayTurn;
+}
+
+export interface RolePlayTranslateResult {
+  success: true;
+  action: "translate";
+  sessionId: string;
+  turnIndex: number;
+  translation: string;
 }
 
 export interface RolePlayEndResult {
@@ -318,6 +331,9 @@ export async function startRolePlaySession(
   interactionMode:
     RolePlayInteractionMode =
       "text",
+  conversationLanguage:
+    RolePlayConversationLanguage =
+      "hyw",
   signal?: AbortSignal,
 ): Promise<RolePlayStartResult> {
   return requestRolePlay<RolePlayStartResult>(
@@ -328,6 +344,8 @@ export async function startRolePlaySession(
       scenarioSlug,
 
       interactionMode,
+
+      conversationLanguage,
     },
     accessToken,
     signal,
@@ -359,6 +377,29 @@ export async function sendRolePlayMessage(
   );
 }
 
+export async function translateRolePlayTurn(
+  sessionId: string,
+  turnIndex: number,
+  accessToken: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  const result =
+    await requestRolePlay<RolePlayTranslateResult>(
+      {
+        action:
+          "translate",
+
+        sessionId,
+
+        turnIndex,
+      },
+      accessToken,
+      signal,
+    );
+
+  return result.translation;
+}
+
 export async function endRolePlaySession(
   sessionId: string,
   accessToken: string,
@@ -379,7 +420,7 @@ export async function endRolePlaySession(
 export async function listAdminRolePlayScenarios(
   accessToken: string,
   signal?: AbortSignal,
-): Promise<RolePlayAdminScenario[]> {
+): Promise<RolePlayScenario[]> {
   const result =
     await requestRolePlay<RolePlayAdminListResult>(
       {
