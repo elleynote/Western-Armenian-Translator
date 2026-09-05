@@ -10,12 +10,15 @@ for (const required of [
   "tunapp-footer-scene",
   "tunapp-footer-artwork",
   "tunapp-footer-bar",
-  "For every Armenian who loves their home.",
-  "new Date().getFullYear()",
+  "Copyright © 2026, Tun Online Armenian School. All rights reserved. For every Armenian who loves their home.",
 ]) {
   if (!footer.includes(required)) {
     throw new Error(`TunApp footer missing required markup: ${required}`);
   }
+}
+
+if (footer.includes("new Date().getFullYear()")) {
+  throw new Error("TunApp footer copyright year must be fixed to 2026");
 }
 
 const footerLinks = [
@@ -62,6 +65,33 @@ for (const required of [
   }
 }
 
+const socialLinks = [
+  ["Instagram", "https://instagram.com/tun.armenian"],
+  ["TikTok", "https://www.tiktok.com/@tun.armenian"],
+  ["YouTube", "https://www.youtube.com/@TunOnlineArmenianSchool"],
+];
+
+for (const [label, href] of socialLinks) {
+  const hrefIndex = footer.indexOf(`href="${href}"`);
+  if (hrefIndex === -1) {
+    throw new Error(`TunApp footer missing social link: ${label}`);
+  }
+
+  const anchorStart = footer.lastIndexOf("<a", hrefIndex);
+  const anchorEnd = footer.indexOf("</a>", hrefIndex);
+  const anchorMarkup = footer.slice(anchorStart, anchorEnd + 4);
+
+  for (const required of [
+    `aria-label="${label}"`,
+    'target="_blank"',
+    'rel="noopener noreferrer"',
+  ]) {
+    if (!anchorMarkup.includes(required)) {
+      throw new Error(`TunApp footer ${label} social link missing: ${required}`);
+    }
+  }
+}
+
 for (const required of [
   ".root",
   "padding-top: 32px",
@@ -78,6 +108,9 @@ for (const required of [
   ".footerColumn",
   ".footerHeading",
   ".footerLink",
+  ".socialLinks",
+  ".socialLink",
+  "display: flex",
   ".copyright",
   "@media (max-width: 700px)",
   "min-height: 240px",
@@ -107,4 +140,4 @@ if (css.includes("background: #ffffff;")) {
   throw new Error("TunApp footer should not force a white background");
 }
 
-console.log("TunApp footer image and link-column checks passed.");
+console.log("TunApp footer artwork, link columns, social links and copyright checks passed.");

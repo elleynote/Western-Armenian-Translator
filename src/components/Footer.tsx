@@ -37,6 +37,32 @@ const footerColumns = [
   },
 ] as const;
 
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14 4v10.2a4.2 4.2 0 1 1-3-4V13a1.6 1.6 0 1 0 1 1.5V4h2Zm0 0c.5 2.2 1.8 3.6 4 4.2v2.6c-1.5-.2-2.8-.8-4-1.7V4Z" />
+    </svg>
+  );
+}
+
+function YouTubeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M21 8.2a3 3 0 0 0-2.1-2.1C17 5.6 12 5.6 12 5.6s-5 0-6.9.5A3 3 0 0 0 3 8.2 31 31 0 0 0 2.6 12 31 31 0 0 0 3 15.8a3 3 0 0 0 2.1 2.1c1.9.5 6.9.5 6.9.5s5 0 6.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .4-3.8 31 31 0 0 0-.4-3.8ZM10 15V9l5 3-5 3Z" />
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
     <footer className={styles.root}>
@@ -73,12 +99,44 @@ export function Footer() {
                     </a>
                   ))}
                 </div>
+
+                {column.heading === "Company" ? (
+                  <div className={styles.socialLinks}>
+                    <a
+                      className={styles.socialLink}
+                      href="https://instagram.com/tun.armenian"
+                      aria-label="Instagram"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <InstagramIcon />
+                    </a>
+                    <a
+                      className={styles.socialLink}
+                      href="https://www.tiktok.com/@tun.armenian"
+                      aria-label="TikTok"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <TikTokIcon />
+                    </a>
+                    <a
+                      className={styles.socialLink}
+                      href="https://www.youtube.com/@TunOnlineArmenianSchool"
+                      aria-label="YouTube"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <YouTubeIcon />
+                    </a>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
 
           <p className={styles.copyright}>
-            Copyright © {new Date().getFullYear()}. All rights reserved. For every Armenian who loves their home.
+            Copyright © 2026, Tun Online Armenian School. All rights reserved. For every Armenian who loves their home.
           </p>
         </div>
       </div>
