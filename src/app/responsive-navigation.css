@@ -1,3 +1,7 @@
+.brand-strip-inner {
+  justify-content: center;
+}
+
 .mobile-session-action {
   display: none !important;
 }
