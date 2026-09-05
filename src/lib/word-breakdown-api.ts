@@ -2,6 +2,10 @@ import {
   getSupabaseConfig,
 } from "@/lib/supabase/client";
 
+export type WordBreakdownLanguage =
+  | "hyw"
+  | "hye";
+
 export interface WordBreakdownWord {
   text: string;
   meaning: string;
@@ -94,6 +98,7 @@ function apiError(
 
 export async function requestWordBreakdown(
   text: string,
+  language: WordBreakdownLanguage,
   accessToken: string,
   signal?: AbortSignal,
 ): Promise<WordBreakdownResult> {
@@ -130,6 +135,7 @@ export async function requestWordBreakdown(
         body:
           JSON.stringify({
             text,
+            language,
           }),
 
         cache:
