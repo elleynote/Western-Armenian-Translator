@@ -88,8 +88,13 @@ assert.match(
 );
 assert.match(
   rolePlayFunction,
-  /action ===\s*"translate"/u,
-  "Role-Play Edge Function should translate owned assistant turns to English.",
+  /action ===\s*"translate"[\s\S]*\.eq\(\s*"user_id",[\s\S]*user\.id/u,
+  "Role-Play translation should verify that the session belongs to the current user.",
+);
+assert.doesNotMatch(
+  rolePlayFunction,
+  /translation_history/u,
+  "Role-Play message translation should stay isolated from normal translation history.",
 );
 assert.match(
   rolePlayFunction,
