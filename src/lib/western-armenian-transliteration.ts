@@ -67,6 +67,7 @@ function endsSentence(value: string): boolean {
  *
  * Pronunciation notes requested for learner output:
  * - ես -> "yes" only when it is the first word of a sentence; otherwise "es".
+ * - եմ -> "em" in every sentence position.
  * - ե -> "ye" at the beginning of an ordinary word and "e" elsewhere.
  * - ո -> "vo" at the beginning of a word and "o" elsewhere.
  */
@@ -97,6 +98,24 @@ export function transliterateWesternArmenian(value: string): string {
         atSentenceStart
           ? "yes"
           : "es",
+      );
+
+      index += 1;
+      previousWasArmenian = true;
+      atSentenceStart = false;
+      continue;
+    }
+
+    // եմ is always transliterated as "em", never "yem".
+    if (
+      wordStart &&
+      lower === "ե" &&
+      nextLower === "մ" &&
+      !isArmenianLetter(afterNext)
+    ) {
+      output += preserveCase(
+        current,
+        "em",
       );
 
       index += 1;
