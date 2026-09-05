@@ -420,7 +420,7 @@ export async function endRolePlaySession(
 export async function listAdminRolePlayScenarios(
   accessToken: string,
   signal?: AbortSignal,
-): Promise<RolePlayScenario[]> {
+): Promise<RolePlayAdminScenario[]> {
   const result =
     await requestRolePlay<RolePlayAdminListResult>(
       {
