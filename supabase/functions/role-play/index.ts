@@ -46,7 +46,8 @@ type RolePlayAction =
   | "admin_publish"
   | "admin_unpublish"
   | "admin_archive"
-  | "admin_restore";
+  | "admin_restore"
+  | "translate";
 
 type InteractionMode =
   | "text"
@@ -56,6 +57,10 @@ type InteractionMode =
 type TurnModality =
   | "text"
   | "voice";
+
+type ConversationLanguage =
+  | "hyw"
+  | "hye";
 
 
 interface RolePlayRequest {
@@ -67,6 +72,8 @@ interface RolePlayRequest {
   message?: unknown;
   modality?: unknown;
   interactionMode?: unknown;
+  conversationLanguage?: unknown;
+  turnIndex?: unknown;
 }
 
 
@@ -133,6 +140,7 @@ interface SessionRow {
   started_at: string;
   last_activity_at: string;
   ended_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 
@@ -201,6 +209,7 @@ const SESSION_FIELDS = [
   "started_at",
   "last_activity_at",
   "ended_at",
+  "metadata",
 ].join(",");
 
 
@@ -250,6 +259,7 @@ function parseAction(
     value === "list" ||
     value === "start" ||
     value === "message" ||
+    value === "translate" ||
     value === "end" ||
     value === "admin_list" ||
     value === "admin_create" ||
@@ -294,6 +304,29 @@ function parseModality(
   return null;
 }
 
+
+function parseConversationLanguage(
+  value: unknown,
+): ConversationLanguage | null {
+  if (
+    value === "hyw" ||
+    value === "hye"
+  ) {
+    return value;
+  }
+
+  return null;
+}
+
+
+function sessionConversationLanguage(
+  session: SessionRow,
+): ConversationLanguage {
+  return parseConversationLanguage(
+    session.metadata
+      ?.conversationLanguage,
+  ) ?? "hyw";
+}
 
 function isUuid(
   value: string,
@@ -957,6 +990,11 @@ function sessionResponse(
     interactionMode:
       session.interaction_mode,
 
+    conversationLanguage:
+      sessionConversationLanguage(
+        session,
+      ),
+
     messageCount:
       session.message_count,
 
@@ -1146,35 +1184,31 @@ function addContextCounts(
 async function findRolePlayKnowledge(
   admin: SupabaseClient,
   text: string,
+  conversationLanguage:
+    ConversationLanguage,
 ): Promise<RolePlayKnowledge> {
-  /*
-   * Role-Play always produces Western Armenian,
-   * so English -> Western Armenian is the primary
-   * approved language guidance.
-   */
-  const toWesternPromise =
+  const targetLanguage =
+    conversationLanguage;
+
+  const otherArmenianLanguage:
+    ConversationLanguage =
+      targetLanguage === "hyw"
+        ? "hye"
+        : "hyw";
+
+  const toTargetPromise =
     findRelevantContext(
       admin,
       text,
       "en",
-      "hyw",
+      targetLanguage,
     );
 
   const containsArmenian =
     ARMENIAN_SCRIPT_PATTERN
       .test(text);
 
-  /*
-   * If the learner writes Armenian, also retrieve:
-   *
-   * - Western Armenian -> English references to help
-   *   the AI understand approved meanings.
-   *
-   * - Eastern Armenian -> Western Armenian references
-   *   in case the learner uses Eastern Armenian forms
-   *   that should be converted naturally.
-   */
-  const westernInputPromise:
+  const targetInputPromise:
     Promise<
       TranslationContext | null
     > =
@@ -1182,14 +1216,14 @@ async function findRolePlayKnowledge(
         ? findRelevantContext(
             admin,
             text,
-            "hyw",
+            targetLanguage,
             "en",
           )
         : Promise.resolve(
             null,
           );
 
-  const easternToWesternPromise:
+  const crossVarietyPromise:
     Promise<
       TranslationContext | null
     > =
@@ -1197,22 +1231,22 @@ async function findRolePlayKnowledge(
         ? findRelevantContext(
             admin,
             text,
-            "hye",
-            "hyw",
+            otherArmenianLanguage,
+            targetLanguage,
           )
         : Promise.resolve(
             null,
           );
 
   const [
-    toWestern,
-    westernInput,
-    easternToWestern,
+    toTarget,
+    targetInput,
+    crossVariety,
   ] =
     await Promise.all([
-      toWesternPromise,
-      westernInputPromise,
-      easternToWesternPromise,
+      toTargetPromise,
+      targetInputPromise,
+      crossVarietyPromise,
     ]);
 
   const counts:
@@ -1229,35 +1263,45 @@ async function findRolePlayKnowledge(
 
   addContextCounts(
     counts,
-    toWestern,
+    toTarget,
   );
 
   addContextCounts(
     counts,
-    westernInput,
+    targetInput,
   );
 
   addContextCounts(
     counts,
-    easternToWestern,
+    crossVariety,
   );
+
+  const targetName =
+    targetLanguage === "hyw"
+      ? "WESTERN ARMENIAN"
+      : "EASTERN ARMENIAN";
+
+  const otherName =
+    otherArmenianLanguage === "hyw"
+      ? "WESTERN ARMENIAN"
+      : "EASTERN ARMENIAN";
 
   const sections = [
     knowledgeSection(
-      "APPROVED ENGLISH -> WESTERN ARMENIAN GUIDANCE",
-      toWestern,
+      `APPROVED ENGLISH -> ${targetName} GUIDANCE`,
+      toTarget,
       true,
     ),
 
     knowledgeSection(
-      "APPROVED WESTERN ARMENIAN INPUT REFERENCES",
-      westernInput,
+      `APPROVED ${targetName} INPUT REFERENCES`,
+      targetInput,
       false,
     ),
 
     knowledgeSection(
-      "APPROVED EASTERN -> WESTERN ARMENIAN GUIDANCE",
-      easternToWestern,
+      `APPROVED ${otherName} -> ${targetName} GUIDANCE`,
+      crossVariety,
       true,
     ),
   ].filter(Boolean);
@@ -2399,6 +2443,13 @@ Deno.serve(
         ) ??
         "text";
 
+      const conversationLanguage =
+        parseConversationLanguage(
+          payload
+            .conversationLanguage,
+        ) ??
+        "hyw";
+
       const scenarioResult =
         await admin
           .from(
@@ -2467,6 +2518,134 @@ Deno.serve(
         );
       }
 
+      let openingMessage =
+        scenario
+          .opening_message;
+
+      if (
+        conversationLanguage ===
+        "hye"
+      ) {
+        if (
+          !config
+            .openAiApiKey
+        ) {
+          return json(
+            {
+              success:
+                false,
+
+              error:
+                "The Role-Play AI service is not configured correctly.",
+
+              code:
+                "openai_configuration_error",
+            },
+            503,
+            cors,
+          );
+        }
+
+        try {
+          const model =
+            config
+              .openAiModel;
+
+          const reasoning =
+            reasoningForModel(
+              model,
+            );
+
+          const client =
+            new OpenAI({
+              apiKey:
+                config
+                  .openAiApiKey,
+
+              maxRetries:
+                0,
+
+              timeout:
+                config
+                  .openAiTimeoutMs,
+            });
+
+          const response =
+            await client
+              .responses
+              .create({
+                model,
+
+                instructions:
+                  "Return a natural Eastern Armenian version of the supplied Role-Play opening message. Preserve its meaning, tone and conversational purpose. Use standard Eastern Armenian. Output only the Armenian message, with no explanation.",
+
+                input:
+                  scenario
+                    .opening_message,
+
+                max_output_tokens:
+                  300,
+
+                ...(reasoning
+                  ? {
+                      reasoning,
+                    }
+                  : {}),
+
+                store:
+                  false,
+              });
+
+          openingMessage =
+            Array.from(
+              response
+                .output_text
+                ?.trim() ??
+              "",
+            )
+              .slice(
+                0,
+                MAX_ROLE_PLAY_REPLY_CHARACTERS,
+              )
+              .join("")
+              .trim();
+
+          if (!openingMessage) {
+            throw new Error(
+              "EMPTY_ROLE_PLAY_OPENING",
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Eastern Role-Play opening generation failed",
+            error,
+          );
+
+          const friendly =
+            friendlyOpenAiError(
+              error,
+            );
+
+          return json(
+            {
+              success:
+                false,
+
+              error:
+                friendly
+                  .message,
+
+              code:
+                friendly
+                  .code,
+            },
+            friendly
+              .status,
+            cors,
+          );
+        }
+      }
+
       const sessionResult =
         await admin
           .from(
@@ -2500,6 +2679,8 @@ Deno.serve(
 
               difficulty:
                 scenario.difficulty,
+
+              conversationLanguage,
             },
           })
           .select(
@@ -2563,8 +2744,7 @@ Deno.serve(
               openingModality,
 
             content:
-              scenario
-                .opening_message,
+              openingMessage,
           });
 
       if (
@@ -2634,8 +2814,7 @@ Deno.serve(
               openingModality,
 
             content:
-              scenario
-                .opening_message,
+              openingMessage,
           },
         },
         201,
@@ -2643,6 +2822,294 @@ Deno.serve(
       );
     }
 
+
+    /*
+     * TRANSLATE ASSISTANT TURN
+     */
+    if (
+      action === "translate"
+    ) {
+      if (
+        !config
+          .openAiApiKey
+      ) {
+        return json(
+          {
+            success:
+              false,
+
+            error:
+              "The Role-Play AI service is not configured correctly.",
+
+            code:
+              "openai_configuration_error",
+          },
+          503,
+          cors,
+        );
+      }
+
+      const sessionId =
+        typeof payload
+          .sessionId ===
+          "string"
+          ? payload
+              .sessionId
+              .trim()
+          : "";
+
+      const turnIndex =
+        typeof payload
+          .turnIndex ===
+          "number"
+          ? payload
+              .turnIndex
+          : Number.NaN;
+
+      if (
+        !sessionId ||
+        !isUuid(
+          sessionId,
+        ) ||
+        !Number.isInteger(
+          turnIndex,
+        ) ||
+        turnIndex < 1
+      ) {
+        return json(
+          {
+            success:
+              false,
+
+            error:
+              "A valid Role-Play assistant message is required.",
+
+            code:
+              "invalid_turn",
+          },
+          400,
+          cors,
+        );
+      }
+
+      const sessionResult =
+        await admin
+          .from(
+            "role_play_sessions",
+          )
+          .select(
+            SESSION_FIELDS,
+          )
+          .eq(
+            "id",
+            sessionId,
+          )
+          .eq(
+            "user_id",
+            user.id,
+          )
+          .maybeSingle();
+
+      if (
+        sessionResult.error ||
+        !sessionResult.data
+      ) {
+        return json(
+          {
+            success:
+              false,
+
+            error:
+              "This Role-Play session was not found.",
+
+            code:
+              "session_not_found",
+          },
+          sessionResult.error
+            ? 500
+            : 404,
+          cors,
+        );
+      }
+
+      const roleSession =
+        sessionResult
+          .data as
+          SessionRow;
+
+      const turnResult =
+        await admin
+          .from(
+            "role_play_turns",
+          )
+          .select(
+            "turn_index,speaker,content",
+          )
+          .eq(
+            "session_id",
+            roleSession.id,
+          )
+          .eq(
+            "turn_index",
+            turnIndex,
+          )
+          .maybeSingle();
+
+      if (
+        turnResult.error ||
+        !turnResult.data ||
+        turnResult
+          .data
+          .speaker !==
+          "assistant"
+      ) {
+        return json(
+          {
+            success:
+              false,
+
+            error:
+              "This Role-Play assistant message was not found.",
+
+            code:
+              "turn_not_found",
+          },
+          turnResult.error
+            ? 500
+            : 404,
+          cors,
+        );
+      }
+
+      const sourceLanguage =
+        sessionConversationLanguage(
+          roleSession,
+        );
+
+      const sourceName =
+        sourceLanguage === "hye"
+          ? "Eastern Armenian"
+          : "Western Armenian";
+
+      try {
+        const model =
+          config
+            .openAiModel;
+
+        const reasoning =
+          reasoningForModel(
+            model,
+          );
+
+        const client =
+          new OpenAI({
+            apiKey:
+              config
+                .openAiApiKey,
+
+            maxRetries:
+              0,
+
+            timeout:
+              config
+                .openAiTimeoutMs,
+          });
+
+        const response =
+          await client
+            .responses
+            .create({
+              model,
+
+              instructions:
+                `Translate the supplied ${sourceName} Role-Play message into clear, natural English. Preserve its meaning and conversational tone. Output only the English translation, with no explanation.`,
+
+              input:
+                turnResult
+                  .data
+                  .content,
+
+              max_output_tokens:
+                600,
+
+              ...(reasoning
+                ? {
+                    reasoning,
+                  }
+                : {}),
+
+              store:
+                false,
+            });
+
+        const translation =
+          Array.from(
+            response
+              .output_text
+              ?.trim() ??
+            "",
+          )
+            .slice(
+              0,
+              MAX_ROLE_PLAY_REPLY_CHARACTERS,
+            )
+            .join("")
+            .trim();
+
+        if (!translation) {
+          throw new Error(
+            "EMPTY_ROLE_PLAY_TRANSLATION",
+          );
+        }
+
+        return json(
+          {
+            success:
+              true,
+
+            action:
+              "translate",
+
+            sessionId:
+              roleSession.id,
+
+            turnIndex,
+
+            translation,
+          },
+          200,
+          cors,
+        );
+      } catch (error) {
+        console.error(
+          "Role-Play translation failed",
+          error,
+        );
+
+        const friendly =
+          friendlyOpenAiError(
+            error,
+          );
+
+        return json(
+          {
+            success:
+              false,
+
+            error:
+              friendly
+                .message,
+
+            code:
+              friendly
+                .code,
+          },
+          friendly
+            .status,
+          cors,
+        );
+      }
+    }
 
     /*
      * MESSAGE
@@ -2899,10 +3366,16 @@ Deno.serve(
        * OpenAI request. This reuses the exact
        * backend Knowledge Base used by Translation.
        */
+      const conversationLanguage =
+        sessionConversationLanguage(
+          session,
+        );
+
       const knowledgePromise =
         findRolePlayKnowledge(
           admin,
           message,
+          conversationLanguage,
         );
 
       const userTurnIndex =
@@ -3046,8 +3519,17 @@ Deno.serve(
               .promptText
           : "No matching approved Knowledge Base records were found for this turn.";
 
+      const languageRules =
+        conversationLanguage === "hye"
+          ? `- Respond primarily in Eastern Armenian.
+- Use natural Eastern Armenian, not Western Armenian.
+- Use standard Eastern Armenian spelling and grammar.`
+          : `- Respond primarily in Western Armenian.
+- Use natural Western Armenian, not Eastern Armenian.
+- Preserve traditional Western Armenian orthography.`;
+
       const instructions = `
-You are the AI conversation partner in the Tun Western Armenian Role-Play learning feature.
+You are the AI conversation partner in the Tun Armenian Role-Play learning feature.
 
 ROLE-PLAY SCENARIO
 
@@ -3079,19 +3561,17 @@ ${approvedKnowledge}
 ROLE-PLAY RULES
 
 - Stay in character and continue the selected real-world scenario naturally.
-- Respond primarily in Western Armenian.
-- Use natural Western Armenian, not Eastern Armenian.
-- Preserve traditional Western Armenian orthography.
+${languageRules}
 - Treat the approved Tun Knowledge Base as trusted language guidance.
 - Prefer approved glossary terminology when it is relevant to the current conversation.
 - Apply approved grammar guidance when relevant.
 - Use approved examples as style and phrasing references, not as text that must be copied.
 - An exact approved translation is only a language reference. Do not automatically repeat it as your role-play response unless that would naturally be the correct thing for your character to say.
-- If Eastern Armenian language guidance is present, use it only when it helps convert Eastern Armenian learner wording into natural Western Armenian.
-- If Western Armenian to English references are present, use them only to understand the learner's meaning. Continue replying primarily in Western Armenian.
+- If guidance from the other Armenian variety is present, use it only when it helps understand or convert the learner wording naturally into the selected conversation variety.
+- If Armenian to English references are present, use them only to understand the learner meaning. Continue replying primarily in the selected Armenian variety.
 - Keep each response conversational and concise, normally 1 to 3 sentences.
 - Encourage the learner to continue by naturally asking a question, responding to what they said, or offering an appropriate choice.
-- If the learner writes in English or Latin-script Armenian, understand the intended meaning and continue the scenario primarily in Western Armenian.
+- If the learner writes in English or Latin-script Armenian, understand the intended meaning and continue the scenario primarily in the selected Armenian variety.
 - If the learner explicitly asks what something means or asks for language help, you may briefly clarify it, then return to the scenario.
 - Do not turn ordinary turns into grammar lessons, dictionary entries, long explanations, or generic chatbot answers.
 - Do not invent personal facts about the learner.
@@ -3340,6 +3820,8 @@ ROLE-PLAY RULES
                 "active",
 
               interactionMode,
+
+              conversationLanguage,
 
               messageCount:
                 assistantTurnIndex,

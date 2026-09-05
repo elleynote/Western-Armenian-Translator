@@ -27,6 +27,7 @@ import {
 
 import {
   requestWordBreakdown,
+  type WordBreakdownLanguage,
   type WordBreakdownResult,
   type WordBreakdownWord,
 } from "@/lib/word-breakdown-api";
@@ -49,15 +50,19 @@ function normalizedMeaning(
 
 function ArmenianText({
   text,
+  language,
   className = "",
 }: {
   text: string;
+  language: WordBreakdownLanguage;
   className?: string;
 }) {
   const transliteration =
-    transliterateWesternArmenian(
-      text,
-    );
+    language === "hyw"
+      ? transliterateWesternArmenian(
+          text,
+        )
+      : "";
 
   return (
     <div className="word-breakdown-armenian">
@@ -79,14 +84,17 @@ function ArmenianText({
 
 function WordCard({
   word,
+  language,
 }: {
   word: WordBreakdownWord;
+  language: WordBreakdownLanguage;
 }) {
   return (
     <article className="word-breakdown-word-card">
       <div className="word-breakdown-word-heading">
         <ArmenianText
           text={word.text}
+          language={language}
           className="word-breakdown-word"
         />
 
@@ -116,6 +124,7 @@ function WordCard({
 
             <ArmenianText
               text={word.baseForm}
+              language={language}
               className="word-breakdown-base-form"
             />
           </div>
@@ -153,11 +162,27 @@ export default function WordBreakdownPage() {
     useState("");
 
   const [
+    language,
+    setLanguage,
+  ] =
+    useState<WordBreakdownLanguage>(
+      "hyw",
+    );
+
+  const [
     result,
     setResult,
   ] =
     useState<WordBreakdownResult | null>(
       null,
+    );
+
+  const [
+    resultLanguage,
+    setResultLanguage,
+  ] =
+    useState<WordBreakdownLanguage>(
+      "hyw",
     );
 
   const [
@@ -226,6 +251,11 @@ export default function WordBreakdownPage() {
       },
     );
 
+  const languageName =
+    language === "hye"
+      ? "Eastern Armenian"
+      : "Western Armenian";
+
   async function submit(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -258,9 +288,14 @@ export default function WordBreakdownPage() {
       const next =
         await requestWordBreakdown(
           value,
+          language,
           session.access_token,
           controller.signal,
         );
+
+      setResultLanguage(
+        language,
+      );
 
       setResult(
         next,
@@ -315,11 +350,11 @@ export default function WordBreakdownPage() {
             </p>
 
             <h1>
-              Western Armenian Word Breakdown
+              {languageName} Word Breakdown
             </h1>
 
             <p>
-              Understand how a Western Armenian word,
+              Understand how a {languageName} word,
               phrase or short sentence works through
               natural meaning, literal construction,
               base forms and concise grammar explanations.
@@ -358,10 +393,36 @@ export default function WordBreakdownPage() {
                   className="word-breakdown-form"
                   onSubmit={submit}
                 >
+                  <label className="word-breakdown-language-control">
+                    <span>
+                      Language
+                    </span>
+
+                    <select
+                      value={language}
+                      disabled={loading}
+                      onChange={(event) =>
+                        setLanguage(
+                          event.target.value === "hye"
+                            ? "hye"
+                            : "hyw",
+                        )
+                      }
+                    >
+                      <option value="hyw">
+                        Western Armenian
+                      </option>
+
+                      <option value="hye">
+                        Eastern Armenian
+                      </option>
+                    </select>
+                  </label>
+
                   <label
                     htmlFor="word-breakdown-text"
                   >
-                    Western Armenian text
+                    {languageName} text
                   </label>
 
                   <textarea
@@ -370,7 +431,7 @@ export default function WordBreakdownPage() {
                     value={text}
                     maxLength={500}
                     rows={4}
-                    placeholder="Enter or paste a Western Armenian word, phrase or short sentence"
+                    placeholder={`Enter or paste a ${languageName} word, phrase or short sentence`}
                     onChange={(event) =>
                       setText(
                         event.target.value,
@@ -380,8 +441,9 @@ export default function WordBreakdownPage() {
 
                   <div className="word-breakdown-form-footer">
                     <span className="word-breakdown-helper">
-                      Tip: open Word Breakdown directly
-                      from a Western Armenian translation.
+                      {language === "hyw"
+                        ? "Tip: open Word Breakdown directly from a Western Armenian translation."
+                        : "Tip: choose Eastern Armenian when the text uses Eastern Armenian spelling and grammar."}
                     </span>
 
                     <span className="word-breakdown-counter">
@@ -422,6 +484,7 @@ export default function WordBreakdownPage() {
 
                     <ArmenianText
                       text={result.input}
+                      language={resultLanguage}
                       className="word-breakdown-query-text"
                     />
                   </div>
@@ -479,6 +542,7 @@ export default function WordBreakdownPage() {
                           <WordCard
                             key={`${word.text}-${index}`}
                             word={word}
+                            language={resultLanguage}
                           />
                         ),
                       )}
