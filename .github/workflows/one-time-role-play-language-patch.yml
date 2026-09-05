@@ -6,6 +6,7 @@ on:
       - feature/role-play-word-breakdown-language-toggles
     paths:
       - scripts/apply-role-play-language-patch.mjs
+      - .github/workflows/one-time-role-play-language-patch.yml
 
 permissions:
   contents: write
@@ -24,6 +25,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Repair patch script parser escape
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/apply-role-play-language-patch.mjs")
+          text = path.read_text()
+          old = r"\n}\n\n\nfunction nextInteractionMode"
+          new = r"\n\}\n\n\nfunction nextInteractionMode"
+          assert text.count(old) == 1
+          path.write_text(text.replace(old, new))
+          PY
+          node --check scripts/apply-role-play-language-patch.mjs
 
       - name: Apply asserted source patch
         run: node scripts/apply-role-play-language-patch.mjs
