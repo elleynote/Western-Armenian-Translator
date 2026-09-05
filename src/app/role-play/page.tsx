@@ -42,6 +42,8 @@ import {
   listRolePlayScenarios,
   sendRolePlayMessage,
   startRolePlaySession,
+  translateRolePlayTurn,
+  type RolePlayConversationLanguage,
   type RolePlayScenario,
   type RolePlaySession,
   type RolePlayTurn,
@@ -62,13 +64,25 @@ function formatDifficulty(
 
 function AssistantMessage({
   content,
+  conversationLanguage,
+  translation,
+  translationVisible,
+  translating,
+  onTranslate,
 }: {
   content: string;
+  conversationLanguage: RolePlayConversationLanguage;
+  translation?: string;
+  translationVisible: boolean;
+  translating: boolean;
+  onTranslate: () => void;
 }) {
   const transliteration =
-    transliterateWesternArmenian(
-      content,
-    );
+    conversationLanguage === "hyw"
+      ? transliterateWesternArmenian(
+          content,
+        )
+      : "";
 
   return (
     <div className="role-play-assistant-content">
@@ -83,14 +97,36 @@ function AssistantMessage({
           </div>
         )}
 
+      {translation &&
+        translationVisible && (
+          <div className="role-play-transliteration">
+            <strong>English:</strong>{" "}
+            {translation}
+          </div>
+        )}
+
       <div className="role-play-assistant-actions">
         <VoiceListenButton
           text={content}
-          language="hyw"
+          language={conversationLanguage}
           label="Listen"
           compact
           mode="natural"
         />
+
+        <button
+          type="button"
+          className="panel-action"
+          disabled={translating}
+          onClick={onTranslate}
+        >
+          {translating
+            ? "Translating..."
+            : translation &&
+                translationVisible
+              ? "Hide English"
+              : "Translate to English"}
+        </button>
       </div>
     </div>
   );
@@ -140,6 +176,14 @@ export default function RolePlayPage() {
     useState("");
 
   const [
+    conversationLanguage,
+    setConversationLanguage,
+  ] =
+    useState<RolePlayConversationLanguage>(
+      "hyw",
+    );
+
+  const [
     activeScenario,
     setActiveScenario,
   ] =
@@ -164,6 +208,30 @@ export default function RolePlayPage() {
     );
 
   const [
+    translations,
+    setTranslations,
+  ] =
+    useState<Record<number, string>>(
+      {},
+    );
+
+  const [
+    visibleTranslations,
+    setVisibleTranslations,
+  ] =
+    useState<Record<number, boolean>>(
+      {},
+    );
+
+  const [
+    translatingTurn,
+    setTranslatingTurn,
+  ] =
+    useState<number | null>(
+      null,
+    );
+
+  const [
     draft,
     setDraft,
   ] =
@@ -173,7 +241,7 @@ export default function RolePlayPage() {
     speechLanguage,
     setSpeechLanguage,
   ] =
-    useState<"hyw" | "en">(
+    useState<"hyw" | "hye" | "en">(
       "hyw",
     );
 
@@ -221,6 +289,11 @@ export default function RolePlayPage() {
     );
 
   const actionAbortRef =
+    useRef<AbortController | null>(
+      null,
+    );
+
+  const translateAbortRef =
     useRef<AbortController | null>(
       null,
     );
@@ -314,7 +387,6 @@ export default function RolePlayPage() {
     session?.access_token,
   ]);
 
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView(
       {
@@ -330,14 +402,13 @@ export default function RolePlayPage() {
     sending,
   ]);
 
-
   useEffect(() => {
     return () => {
       listAbortRef.current?.abort();
       actionAbortRef.current?.abort();
+      translateAbortRef.current?.abort();
     };
   }, []);
-
 
   const selectedScenario =
     scenarios.find(
@@ -345,7 +416,6 @@ export default function RolePlayPage() {
         scenario.slug ===
         selectedSlug,
     ) ?? null;
-
 
   async function startScenario() {
     if (
@@ -373,6 +443,7 @@ export default function RolePlayPage() {
           selectedScenario.slug,
           session.access_token,
           "text",
+          conversationLanguage,
           controller.signal,
         );
 
@@ -384,10 +455,16 @@ export default function RolePlayPage() {
         result.session,
       );
 
+      setConversationLanguage(
+        result.session.conversationLanguage,
+      );
+
       setTurns([
         result.turn,
       ]);
 
+      setTranslations({});
+      setVisibleTranslations({});
       setDraft("");
     } catch (cause) {
       if (
@@ -414,7 +491,6 @@ export default function RolePlayPage() {
       }
     }
   }
-
 
   async function sendMessage(
     value: string,
@@ -459,6 +535,10 @@ export default function RolePlayPage() {
         result.session,
       );
 
+      setConversationLanguage(
+        result.session.conversationLanguage,
+      );
+
       setTurns(
         (current) => [
           ...current,
@@ -494,6 +574,93 @@ export default function RolePlayPage() {
     }
   }
 
+  async function toggleEnglishTranslation(
+    turnIndex: number,
+  ) {
+    if (
+      !roleSession ||
+      !session?.access_token ||
+      translatingTurn !== null
+    ) {
+      return;
+    }
+
+    if (translations[turnIndex]) {
+      setVisibleTranslations(
+        (current) => ({
+          ...current,
+          [turnIndex]:
+            !current[turnIndex],
+        }),
+      );
+
+      return;
+    }
+
+    translateAbortRef.current?.abort();
+
+    const controller =
+      new AbortController();
+
+    translateAbortRef.current =
+      controller;
+
+    setTranslatingTurn(
+      turnIndex,
+    );
+    setError(null);
+
+    try {
+      const translation =
+        await translateRolePlayTurn(
+          roleSession.id,
+          turnIndex,
+          session.access_token,
+          controller.signal,
+        );
+
+      setTranslations(
+        (current) => ({
+          ...current,
+          [turnIndex]:
+            translation,
+        }),
+      );
+
+      setVisibleTranslations(
+        (current) => ({
+          ...current,
+          [turnIndex]:
+            true,
+        }),
+      );
+    } catch (cause) {
+      if (
+        cause instanceof DOMException &&
+        cause.name === "AbortError"
+      ) {
+        return;
+      }
+
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not translate this Role-Play message.",
+      );
+    } finally {
+      if (
+        translateAbortRef.current ===
+        controller
+      ) {
+        translateAbortRef.current =
+          null;
+
+        setTranslatingTurn(
+          null,
+        );
+      }
+    }
+  }
 
   function submitMessage(
     event: FormEvent<HTMLFormElement>,
@@ -505,7 +672,6 @@ export default function RolePlayPage() {
       "text",
     );
   }
-
 
   function handleSpeechTranscript(
     value: string,
@@ -542,7 +708,6 @@ export default function RolePlayPage() {
     }
   }
 
-
   async function endSession() {
     if (
       !roleSession ||
@@ -575,6 +740,10 @@ export default function RolePlayPage() {
       setRoleSession(
         result.session,
       );
+
+      setConversationLanguage(
+        result.session.conversationLanguage,
+      );
     } catch (cause) {
       if (
         cause instanceof DOMException &&
@@ -601,9 +770,9 @@ export default function RolePlayPage() {
     }
   }
 
-
   function chooseAnotherScenario() {
     actionAbortRef.current?.abort();
+    translateAbortRef.current?.abort();
 
     setActiveScenario(
       null,
@@ -617,15 +786,12 @@ export default function RolePlayPage() {
       [],
     );
 
-    setDraft(
-      "",
-    );
-
-    setError(
-      null,
-    );
+    setTranslations({});
+    setVisibleTranslations({});
+    setTranslatingTurn(null);
+    setDraft("");
+    setError(null);
   }
-
 
   return (
     <ProtectedRoute>
@@ -641,7 +807,7 @@ export default function RolePlayPage() {
             </h1>
 
             <p>
-              Practise real-world Western Armenian
+              Practise real-world Western or Eastern Armenian
               conversations through guided scenarios
               designed for everyday speaking.
             </p>
@@ -660,9 +826,8 @@ export default function RolePlayPage() {
                 </h2>
 
                 <p>
-                  Interactive Western Armenian
-                  conversation practice is included
-                  with Person and Schools access.
+                  Interactive Armenian conversation practice
+                  is included with Person and Schools access.
                 </p>
               </div>
 
@@ -722,18 +887,14 @@ export default function RolePlayPage() {
 
                             return (
                               <button
-                                key={
-                                  scenario.id
-                                }
+                                key={scenario.id}
                                 type="button"
                                 className={
                                   selected
                                     ? "role-play-scenario-card selected"
                                     : "role-play-scenario-card"
                                 }
-                                aria-pressed={
-                                  selected
-                                }
+                                aria-pressed={selected}
                                 onClick={() =>
                                   setSelectedSlug(
                                     scenario.slug,
@@ -742,39 +903,29 @@ export default function RolePlayPage() {
                               >
                                 <div className="role-play-scenario-card-top">
                                   <span className="role-play-scenario-category">
-                                    {
-                                      scenario.category
-                                    }
+                                    {scenario.category}
                                   </span>
 
                                   <span className="role-play-difficulty">
-                                    {
-                                      formatDifficulty(
-                                        scenario.difficulty,
-                                      )
-                                    }
+                                    {formatDifficulty(
+                                      scenario.difficulty,
+                                    )}
                                   </span>
                                 </div>
 
                                 <h3>
-                                  {
-                                    scenario.title
-                                  }
+                                  {scenario.title}
                                 </h3>
 
                                 <p>
-                                  {
-                                    scenario.description
-                                  }
+                                  {scenario.description}
                                 </p>
 
                                 <div className="role-play-scenario-goal">
                                   <strong>
                                     Your role:
                                   </strong>{" "}
-                                  {
-                                    scenario.userRole
-                                  }
+                                  {scenario.userRole}
                                 </div>
                               </button>
                             );
@@ -790,24 +941,44 @@ export default function RolePlayPage() {
                             </span>
 
                             <strong>
-                              {
-                                selectedScenario.title
-                              }
+                              {selectedScenario.title}
                             </strong>
 
                             <span>
-                              {
-                                selectedScenario.setting
-                              }
+                              {selectedScenario.setting}
                             </span>
                           </div>
+
+                          <label className="role-play-speech-language">
+                            <span>
+                              Conversation language
+                            </span>
+
+                            <select
+                              value={conversationLanguage}
+                              disabled={starting}
+                              onChange={(event) =>
+                                setConversationLanguage(
+                                  event.target.value === "hye"
+                                    ? "hye"
+                                    : "hyw",
+                                )
+                              }
+                            >
+                              <option value="hyw">
+                                Western Armenian
+                              </option>
+
+                              <option value="hye">
+                                Eastern Armenian
+                              </option>
+                            </select>
+                          </label>
 
                           <button
                             type="button"
                             className="primary-button role-play-start-button"
-                            disabled={
-                              starting
-                            }
+                            disabled={starting}
                             onClick={() =>
                               void startScenario()
                             }
@@ -832,23 +1003,21 @@ export default function RolePlayPage() {
                     <div>
                       <div className="role-play-conversation-meta">
                         <span className="role-play-mode-badge">
-                          Text + voice practice
+                          {roleSession.conversationLanguage === "hye"
+                            ? "Eastern Armenian"
+                            : "Western Armenian"}
                         </span>
 
                         <span
                           className={
-                            roleSession.status ===
-                            "active"
+                            roleSession.status === "active"
                               ? "role-play-status active"
                               : "role-play-status completed"
                           }
                         >
-                          {
-                            roleSession.status ===
-                            "active"
-                              ? "Active session"
-                              : "Session complete"
-                          }
+                          {roleSession.status === "active"
+                            ? "Active session"
+                            : "Session complete"}
                         </span>
                       </div>
 
@@ -859,22 +1028,16 @@ export default function RolePlayPage() {
 
                       {activeScenario && (
                         <p>
-                          {
-                            activeScenario.description
-                          }
+                          {activeScenario.description}
                         </p>
                       )}
                     </div>
 
-                    {roleSession.status ===
-                      "active" && (
+                    {roleSession.status === "active" && (
                       <button
                         type="button"
                         className="role-play-end-button"
-                        disabled={
-                          ending ||
-                          sending
-                        }
+                        disabled={ending || sending}
                         onClick={() =>
                           void endSession()
                         }
@@ -895,36 +1058,47 @@ export default function RolePlayPage() {
                     {turns.map(
                       (turn) => (
                         <article
-                          key={
-                            turn.turnIndex
-                          }
+                          key={turn.turnIndex}
                           className={
-                            turn.speaker ===
-                            "assistant"
+                            turn.speaker === "assistant"
                               ? "role-play-turn assistant"
                               : "role-play-turn user"
                           }
                         >
                           <div className="role-play-turn-label">
-                            {turn.speaker ===
-                            "assistant"
+                            {turn.speaker === "assistant"
                               ? "Role-Play"
                               : "You"}
                           </div>
 
                           <div className="role-play-bubble">
-                            {turn.speaker ===
-                            "assistant" ? (
+                            {turn.speaker === "assistant" ? (
                               <AssistantMessage
-                                content={
-                                  turn.content
+                                content={turn.content}
+                                conversationLanguage={
+                                  roleSession.conversationLanguage
+                                }
+                                translation={
+                                  translations[turn.turnIndex]
+                                }
+                                translationVisible={
+                                  visibleTranslations[
+                                    turn.turnIndex
+                                  ] === true
+                                }
+                                translating={
+                                  translatingTurn ===
+                                  turn.turnIndex
+                                }
+                                onTranslate={() =>
+                                  void toggleEnglishTranslation(
+                                    turn.turnIndex,
+                                  )
                                 }
                               />
                             ) : (
                               <div className="role-play-user-message">
-                                {
-                                  turn.content
-                                }
+                                {turn.content}
                               </div>
                             )}
                           </div>
@@ -944,20 +1118,13 @@ export default function RolePlayPage() {
                       </article>
                     )}
 
-                    <div
-                      ref={
-                        bottomRef
-                      }
-                    />
+                    <div ref={bottomRef} />
                   </div>
 
-                  {roleSession.status ===
-                  "active" ? (
+                  {roleSession.status === "active" ? (
                     <form
                       className="role-play-composer"
-                      onSubmit={
-                        submitMessage
-                      }
+                      onSubmit={submitMessage}
                     >
                       <label
                         htmlFor="role-play-message"
@@ -968,27 +1135,18 @@ export default function RolePlayPage() {
 
                       <textarea
                         id="role-play-message"
-                        value={
-                          draft
-                        }
-                        maxLength={
-                          5000
-                        }
-                        rows={
-                          3
-                        }
+                        value={draft}
+                        maxLength={5000}
+                        rows={3}
                         disabled={
                           sending ||
                           ending ||
                           listening
                         }
-                        placeholder="Reply in English, Western Armenian, or Latin Armenian..."
-                        onChange={(
-                          event,
-                        ) =>
+                        placeholder="Reply in English, Armenian, or Latin-script Armenian..."
+                        onChange={(event) =>
                           setDraft(
-                            event.target
-                              .value,
+                            event.target.value,
                           )
                         }
                         onKeyDown={
@@ -999,19 +1157,10 @@ export default function RolePlayPage() {
                       <div className="role-play-voice-tools">
                         <div className="role-play-voice-input">
                           <SpeechToTextButton
-                            language={
-                              speechLanguage
-                            }
-                            currentText={
-                              draft
-                            }
-                            maxCharacters={
-                              5000
-                            }
-                            disabled={
-                              sending ||
-                              ending
-                            }
+                            language={speechLanguage}
+                            currentText={draft}
+                            maxCharacters={5000}
+                            disabled={sending || ending}
                             onTranscript={
                               handleSpeechTranscript
                             }
@@ -1033,28 +1182,31 @@ export default function RolePlayPage() {
                           </span>
 
                           <select
-                            value={
-                              speechLanguage
-                            }
+                            value={speechLanguage}
                             disabled={
                               sending ||
                               ending ||
                               listening
                             }
-                            onChange={(
-                              event,
-                            ) =>
+                            onChange={(event) => {
+                              const next =
+                                event.target.value;
+
                               setSpeechLanguage(
-                                event.target
-                                  .value ===
-                                  "en"
+                                next === "en"
                                   ? "en"
-                                  : "hyw",
-                              )
-                            }
+                                  : next === "hye"
+                                    ? "hye"
+                                    : "hyw",
+                              );
+                            }}
                           >
                             <option value="hyw">
                               Western Armenian
+                            </option>
+
+                            <option value="hye">
+                              Eastern Armenian
                             </option>
 
                             <option value="en">
@@ -1086,7 +1238,8 @@ export default function RolePlayPage() {
                             : "Send"}
                         </button>
                       </div>
-                    </form>                  ) : (
+                    </form>
+                  ) : (
                     <div className="role-play-complete-panel">
                       <div>
                         <strong>
@@ -1103,9 +1256,7 @@ export default function RolePlayPage() {
                       <button
                         type="button"
                         className="primary-button"
-                        onClick={
-                          chooseAnotherScenario
-                        }
+                        onClick={chooseAnotherScenario}
                       >
                         Choose another scenario
                       </button>
