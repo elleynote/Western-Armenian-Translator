@@ -7,7 +7,7 @@ const developmentScriptPolicy =
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${developmentScriptPolicy}`,
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com${developmentScriptPolicy}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://tunapp.com",
@@ -17,7 +17,7 @@ const contentSecurityPolicy = [
    * OpenAI is required by the browser-side
    * Realtime WebRTC speech-to-text connection.
    */
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.openai.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.openai.com https://www.google-analytics.com https://*.google-analytics.com",
 
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
   "frame-ancestors 'none'",

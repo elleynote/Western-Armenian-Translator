@@ -7,13 +7,13 @@ import "./responsive-polish.css";
 import "./responsive-navigation.css";
 import "./mobile-user-polish.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = "https://translatearmenian.com";
 const appleIcon = "https://tunapp.com/wp-content/uploads/2020/09/cropped-Tun_Site-Icon-180x180.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Western Armenian Translator | Tun", template: "%s | Tun Translator" },
-  description: "Translate between English, Western Armenian and Eastern Armenian with Tun.",
+  title: { default: "Western Armenian Translator | English to Western Armenian Translation", template: "%s | Tun Translator" },
+  description: "Accurate English to Western Armenian translation services. Get free, instant translations from our online Eastern and Western Armenian translator.",
   applicationName: "Western Armenian Translator",
   robots: { index: true, follow: true },
   icons: {
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     apple: [{ url: appleIcon, sizes: "180x180", type: "image/png" }]
   },
   openGraph: {
-    title: "Western Armenian Translator",
-    description: "Translate between English, Western Armenian and Eastern Armenian.",
+    title: "Western Armenian Translator | English to Western Armenian Translation",
+    description: "Accurate English to Western Armenian translation services. Get free, instant translations from our online Eastern and Western Armenian translator.",
     type: "website"
   }
 };
