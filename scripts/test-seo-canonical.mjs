@@ -98,7 +98,7 @@ function scanDirectory(directory) {
     if (!textExtensions.has(extension) && entry.name !== "_redirects") continue;
     const contents = fs.readFileSync(absolutePath, "utf8").toLowerCase();
     if (contents.includes(forbiddenDomain)) {
-      throw new Error(`Forbidden armenianverbs.com reference found in ${path.relative(repoRoot, absolutePath)}`);
+      throw new Error(`Forbidden comparison-domain reference found in ${path.relative(repoRoot, absolutePath)}`);
     }
   }
 }
