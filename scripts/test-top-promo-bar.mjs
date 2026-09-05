@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 const header = fs.readFileSync("src/components/Header.tsx", "utf8");
-const css = fs.readFileSync("src/app/globals.css", "utf8");
+const navigationCss = fs.readFileSync("src/app/responsive-navigation.css", "utf8");
 
 for (const required of [
   "Try 4 Armenian lessons for $1 →",
@@ -23,7 +23,7 @@ for (const oldCopy of [
   }
 }
 
-const promoBlockMatch = css.match(/\.brand-strip-inner\s*\{[\s\S]*?\}/);
+const promoBlockMatch = navigationCss.match(/\.brand-strip-inner\s*\{[\s\S]*?\}/);
 const promoBlock = promoBlockMatch?.[0] ?? "";
 if (!promoBlock.includes("justify-content: center;")) {
   throw new Error("Top promo bar text is not horizontally centered");
