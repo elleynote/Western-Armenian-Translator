@@ -34,6 +34,21 @@
   padding-inline: 6px;
 }
 
+.experiencePolish :global(.premium-feature-copy) {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding-right: 24px;
+}
+
+.experiencePolish :global(.premium-feature-description) {
+  display: block;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 .historyListPolish article {
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.15fr) auto auto;
   column-gap: 12px;
@@ -115,7 +130,68 @@
 
 @media (max-width: 600px) {
   .experiencePolish :global(.output-panel .panel-header) {
-    grid-template-columns: minmax(145px, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .experiencePolish :global(.output-panel .language-control),
+  .experiencePolish :global(.output-panel .select-wrap) {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  .experiencePolish :global(.output-panel .panel-actions) {
+    width: auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .experiencePolish :global(.output-panel .voice-listen-control) {
+    width: auto;
+    min-width: 0;
+    display: inline-flex;
+    grid-template-columns: none;
+    gap: 4px;
+  }
+
+  .experiencePolish :global(.output-panel .voice-listen-control .panel-action) {
+    width: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0;
+  }
+
+  .experiencePolish :global(.output-panel .voice-speed-select) {
+    width: 54px;
+    min-width: 54px;
+    min-height: 42px;
+    padding-inline: 4px;
+    font-size: 14px;
+  }
+
+  .experiencePolish :global(.output-panel .panel-actions > .panel-action) {
+    width: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0;
+  }
+
+  .experiencePolish :global(.output-panel .panel-body) {
+    min-height: 0;
+  }
+
+  .experiencePolish :global(.output-panel .translation-output) {
+    min-height: 112px;
+  }
+
+  .experiencePolish :global(.premium-feature-description) {
+    font-size: 14px;
+    line-height: 1.5;
   }
 
   .historyListPolish article {
