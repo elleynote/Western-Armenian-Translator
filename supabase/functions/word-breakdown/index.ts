@@ -38,6 +38,9 @@ type WordBreakdownLanguage =
   | "hyw"
   | "hye";
 
+const ARMENIAN_SCRIPT_PATTERN =
+  /[\u0531-\u058F]/u;
+
 interface WordBreakdownWord {
   text: string;
   meaning: string;
@@ -297,6 +300,71 @@ function parseResult(
         parsed.notes,
       ),
   };
+}
+
+async function normalizeLatinTransliteration(
+  client: OpenAI,
+  model: string,
+  reasoning:
+    | {
+        effort: "none" | "minimal";
+      }
+    | undefined,
+  text: string,
+  language: WordBreakdownLanguage,
+): Promise<string> {
+  const languageName =
+    language === "hye"
+      ? "Eastern Armenian"
+      : "Western Armenian";
+
+  const orthographyRule =
+    language === "hye"
+      ? "Use standard Eastern Armenian spelling."
+      : "Use traditional Western Armenian orthography.";
+
+  const response =
+    await client.responses.create({
+      model,
+
+      instructions:
+        `Convert the supplied Latin-script Armenian transliteration into ${languageName} Armenian script. ${orthographyRule} Treat the input as phonetic Armenian transliteration, not as English to translate. Preserve the intended Armenian words, punctuation, and sentence meaning. Output only the Armenian-script text with no explanation, labels, markdown, or Latin text.`,
+
+      input: text,
+
+      max_output_tokens: 700,
+
+      ...(reasoning
+        ? {
+            reasoning,
+          }
+        : {}),
+
+      store: false,
+    });
+
+  const normalized =
+    Array.from(
+      response.output_text
+        ?.trim() ??
+      "",
+    )
+      .slice(0, 500)
+      .join("")
+      .trim();
+
+  if (
+    !normalized ||
+    !ARMENIAN_SCRIPT_PATTERN.test(
+      normalized,
+    )
+  ) {
+    throw new Error(
+      "INVALID_ARMENIAN_TRANSLITERATION",
+    );
+  }
+
+  return normalized;
 }
 
 function openAiError(
@@ -673,10 +741,74 @@ Deno.serve(
       );
     }
 
+    const model =
+      config.openAiModel;
+
+    const reasoning =
+      reasoningForModel(
+        model,
+      );
+
+    const client =
+      new OpenAI({
+        apiKey:
+          config.openAiApiKey,
+
+        maxRetries:
+          0,
+
+        timeout:
+          config.openAiTimeoutMs,
+      });
+
+    const hasArmenianScript =
+      ARMENIAN_SCRIPT_PATTERN.test(
+        text,
+      );
+
+    let analysisText =
+      text;
+
+    let interpretedInput =
+      "";
+
+    if (!hasArmenianScript) {
+      try {
+        analysisText =
+          await normalizeLatinTransliteration(
+            client,
+            model,
+            reasoning,
+            text,
+            language,
+          );
+
+        interpretedInput =
+          analysisText;
+      } catch (error) {
+        const friendly =
+          openAiError(
+            error,
+          );
+
+        return json(
+          {
+            success: false,
+            error:
+              friendly.message,
+            code:
+              friendly.code,
+          },
+          friendly.status,
+          cors,
+        );
+      }
+    }
+
     const knowledge =
       await findRelevantContext(
         admin,
-        text,
+        analysisText,
         language,
         "en",
       );
@@ -761,27 +893,7 @@ Return ONLY one valid JSON object in exactly this structure:
 }
 `.trim();
 
-    const model =
-      config.openAiModel;
-
-    const reasoning =
-      reasoningForModel(
-        model,
-      );
-
     try {
-      const client =
-        new OpenAI({
-          apiKey:
-            config.openAiApiKey,
-
-          maxRetries:
-            0,
-
-          timeout:
-            config.openAiTimeoutMs,
-        });
-
       const response =
         await client.responses.create({
           model,
@@ -802,7 +914,7 @@ Return ONLY one valid JSON object in exactly this structure:
                       language,
 
                       armenian:
-                        text,
+                        analysisText,
 
                       referenceContext:
                         knowledge,
@@ -862,7 +974,9 @@ Return ONLY one valid JSON object in exactly this structure:
           success: true,
 
           input:
-            text,
+            analysisText,
+
+          interpretedInput,
 
           naturalMeaning:
             result.naturalMeaning,
