@@ -54,6 +54,12 @@ assert.match(
 
 assert.match(
   edge,
+  /phonetic Armenian transliteration, not as English to translate/u,
+  "Latin normalization should interpret phonetic Armenian rather than translate English text.",
+);
+
+assert.match(
+  edge,
   /const hasArmenianScript[\s\S]*ARMENIAN_SCRIPT_PATTERN[\s\S]*let analysisText\s*=\s*text[\s\S]*if \(!hasArmenianScript\)/u,
   "Word Breakdown should preserve Armenian-script input and only normalize Latin input.",
 );
