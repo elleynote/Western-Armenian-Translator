@@ -22,6 +22,7 @@ export interface WordBreakdownKnowledgeUsed {
 
 export interface WordBreakdownResult {
   input: string;
+  interpretedInput: string;
   naturalMeaning: string;
   literalMeaning: string;
   words: WordBreakdownWord[];
@@ -178,6 +179,9 @@ export async function requestWordBreakdown(
   return {
     input:
       data.input,
+
+    interpretedInput:
+      data.interpretedInput,
 
     naturalMeaning:
       data.naturalMeaning,

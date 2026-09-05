@@ -431,7 +431,7 @@ export default function WordBreakdownPage() {
                     value={text}
                     maxLength={500}
                     rows={4}
-                    placeholder={`Enter or paste a ${languageName} word, phrase or short sentence`}
+                    placeholder={`Enter Armenian script or Latin transliteration for ${languageName}`}
                     onChange={(event) =>
                       setText(
                         event.target.value,
@@ -442,8 +442,8 @@ export default function WordBreakdownPage() {
                   <div className="word-breakdown-form-footer">
                     <span className="word-breakdown-helper">
                       {language === "hyw"
-                        ? "Tip: open Word Breakdown directly from a Western Armenian translation."
-                        : "Tip: choose Eastern Armenian when the text uses Eastern Armenian spelling and grammar."}
+                        ? "Enter Western Armenian script or Latin transliteration, for example parev tsez."
+                        : "Enter Eastern Armenian script or Latin transliteration; the selected variety controls interpretation."}
                     </span>
 
                     <span className="word-breakdown-counter">
@@ -477,6 +477,20 @@ export default function WordBreakdownPage() {
 
               {result ? (
                 <section className="word-breakdown-results">
+                  {result.interpretedInput ? (
+                    <div className="word-breakdown-query-summary">
+                      <span className="word-breakdown-query-label">
+                        Interpreted as
+                      </span>
+
+                      <ArmenianText
+                        text={result.interpretedInput}
+                        language={resultLanguage}
+                        className="word-breakdown-query-text"
+                      />
+                    </div>
+                  ) : null}
+
                   <div className="word-breakdown-query-summary">
                     <span className="word-breakdown-query-label">
                       Breakdown for

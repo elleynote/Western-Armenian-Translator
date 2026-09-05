@@ -143,8 +143,8 @@ assert.match(
 );
 assert.match(
   wordBreakdownFunction,
-  /findRelevantContext\([\s\S]*admin,[\s\S]*text,[\s\S]*language,[\s\S]*"en"/u,
-  "Word Breakdown knowledge lookup should follow the selected Armenian variety.",
+  /findRelevantContext\([\s\S]*admin,[\s\S]*analysisText,[\s\S]*language,[\s\S]*"en"/u,
+  "Word Breakdown knowledge lookup should follow the selected Armenian variety using the Armenian text being analysed.",
 );
 
 console.log("Learning language toggle checks passed.");
