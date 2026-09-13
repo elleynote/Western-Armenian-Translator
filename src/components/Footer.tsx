@@ -31,6 +31,7 @@ const footerColumns = [
       ["Privacy Policy", "https://tunapp.com/privacy-policy/"],
       ["Website Terms", "https://tunapp.com/website-terms/"],
       ["Affiliate Program", "https://tunapp.com/ambassadors/"],
+      ["Request a Feature", "https://tunapp.com/feature-request"],
       ["Blog", "https://tunapp.com/blog"],
       ["Quizzes", "https://tunapp.com/armenian-quizzes"],
       ["Contact Us", "mailto:hello@tunapp.com"],
