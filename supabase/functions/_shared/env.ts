@@ -24,6 +24,7 @@ function getKeyFromJsonMap(name: string): string | undefined {
 export function getRuntimeConfig() {
   const publishableKeys = new Set<string>();
   const openAiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-5.4";
+  const openAiAccuracyModel = Deno.env.get("OPENAI_ACCURACY_MODEL")?.trim() || Deno.env.get("OPENAI_VERIFIER_MODEL")?.trim() || "gpt-5.6";
   const legacy = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
   if (legacy) publishableKeys.add(legacy);
   const map = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
@@ -40,7 +41,8 @@ export function getRuntimeConfig() {
   return {
     openAiApiKey: Deno.env.get("OPENAI_API_KEY")?.trim() ?? "",
     openAiModel,
-    openAiVerifierModel: Deno.env.get("OPENAI_VERIFIER_MODEL")?.trim() || openAiModel,
+    openAiAccuracyModel,
+    openAiVerifierModel: Deno.env.get("OPENAI_VERIFIER_MODEL")?.trim() || openAiAccuracyModel,
     openAiTimeoutMs: parseNumber(Deno.env.get("OPENAI_TIMEOUT_MS"), 30_000, 5_000, 120_000),
     inputCostPerMillion: parseNumber(Deno.env.get("OPENAI_INPUT_COST_PER_MILLION"), 0, 0, 1000),
     outputCostPerMillion: parseNumber(Deno.env.get("OPENAI_OUTPUT_COST_PER_MILLION"), 0, 0, 1000),
