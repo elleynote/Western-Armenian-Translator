@@ -5,7 +5,13 @@ import { findRelevantContext } from "../_shared/knowledge-base.ts";
 import { friendlyOpenAIError, translateWithOpenAI } from "../_shared/openai-translation.ts";
 import { consumeRateLimit } from "../_shared/rate-limit.ts";
 import { isPublishableKeyAccepted, sha256Hex } from "../_shared/security.ts";
-import { buildTranslationInstructions } from "../_shared/translation-prompt.ts";
+import {
+  buildIndependentTranslationInstructions,
+  buildTranslationAdjudicationInput,
+  buildTranslationAdjudicationInstructions,
+  buildTranslationInstructions,
+  requiresDialectVerification,
+} from "../_shared/translation-prompt.ts";
 import { countCharacters, MAX_REQUEST_BYTES, validateTranslationRequest, ValidationError } from "../_shared/validation.ts";
 import { originMatchesDomain } from "../_shared/widget-domain.ts";
 import type { LanguageCode, PlanConfig } from "../_shared/types.ts";
@@ -272,14 +278,62 @@ export default {
     try {
       if (!translation) {
         const instructions = buildTranslationInstructions(payload.sourceLanguage, payload.targetLanguage, context);
-        const result = await translateWithOpenAI({
+        const openAiConfig = {
           apiKey: config.openAiApiKey,
           model: config.openAiModel,
           timeoutMs: config.openAiTimeoutMs,
           inputCostPerMillion: config.inputCostPerMillion,
           outputCostPerMillion: config.outputCostPerMillion,
-        }, instructions, payload.text, request.signal);
-        translation = result.translation;
+          reasoningEffort: "low" as const,
+        };
+
+        const candidateA = await translateWithOpenAI(
+          openAiConfig,
+          instructions,
+          payload.text,
+          request.signal,
+        );
+
+        if (requiresDialectVerification(payload.targetLanguage)) {
+          const candidateB = await translateWithOpenAI(
+            {
+              ...openAiConfig,
+              model: config.openAiAccuracyModel,
+              reasoningEffort: "medium",
+            },
+            buildIndependentTranslationInstructions(
+              payload.sourceLanguage,
+              payload.targetLanguage,
+              context,
+            ),
+            payload.text,
+            request.signal,
+          );
+
+          const adjudicated = await translateWithOpenAI(
+            {
+              ...openAiConfig,
+              model: config.openAiAccuracyModel,
+              reasoningEffort: "high",
+            },
+            buildTranslationAdjudicationInstructions(
+              payload.sourceLanguage,
+              payload.targetLanguage,
+              context,
+            ),
+            buildTranslationAdjudicationInput(
+              payload.text,
+              candidateA.translation,
+              candidateB.translation,
+            ),
+            request.signal,
+          );
+
+          translation = adjudicated.translation;
+        } else {
+          translation = candidateA.translation;
+        }
+
         openAiProcessed = true;
       }
 
