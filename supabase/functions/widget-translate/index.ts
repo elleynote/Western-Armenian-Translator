@@ -5,7 +5,12 @@ import { findRelevantContext } from "../_shared/knowledge-base.ts";
 import { friendlyOpenAIError, translateWithOpenAI } from "../_shared/openai-translation.ts";
 import { consumeRateLimit } from "../_shared/rate-limit.ts";
 import { isPublishableKeyAccepted, sha256Hex } from "../_shared/security.ts";
-import { buildTranslationInstructions } from "../_shared/translation-prompt.ts";
+import {
+  buildTranslationInstructions,
+  buildTranslationVerificationInput,
+  buildTranslationVerificationInstructions,
+  requiresDialectVerification,
+} from "../_shared/translation-prompt.ts";
 import { countCharacters, MAX_REQUEST_BYTES, validateTranslationRequest, ValidationError } from "../_shared/validation.ts";
 import { originMatchesDomain } from "../_shared/widget-domain.ts";
 import type { LanguageCode, PlanConfig } from "../_shared/types.ts";
@@ -272,14 +277,43 @@ export default {
     try {
       if (!translation) {
         const instructions = buildTranslationInstructions(payload.sourceLanguage, payload.targetLanguage, context);
-        const result = await translateWithOpenAI({
+        const openAiConfig = {
           apiKey: config.openAiApiKey,
           model: config.openAiModel,
           timeoutMs: config.openAiTimeoutMs,
           inputCostPerMillion: config.inputCostPerMillion,
           outputCostPerMillion: config.outputCostPerMillion,
-        }, instructions, payload.text, request.signal);
-        translation = result.translation;
+          reasoningEffort: "low" as const,
+        };
+
+        const draft = await translateWithOpenAI(
+          openAiConfig,
+          instructions,
+          payload.text,
+          request.signal,
+        );
+
+        if (requiresDialectVerification(payload.targetLanguage)) {
+          const verified = await translateWithOpenAI(
+            {
+              ...openAiConfig,
+              model: config.openAiVerifierModel,
+              reasoningEffort: "medium",
+            },
+            buildTranslationVerificationInstructions(
+              payload.sourceLanguage,
+              payload.targetLanguage,
+              context,
+            ),
+            buildTranslationVerificationInput(payload.text, draft.translation),
+            request.signal,
+          );
+
+          translation = verified.translation;
+        } else {
+          translation = draft.translation;
+        }
+
         openAiProcessed = true;
       }
 
