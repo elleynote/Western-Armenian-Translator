@@ -74,7 +74,7 @@ function dialectAccuracyGuidance(target: LanguageCode): string[] {
       "- Conjugate verbs according to Western Armenian usage, including irregular and suppletive verbs. Re-check past, perfect, future, conditional, imperative and negative forms before answering.",
       "- Check Western Armenian pronouns, particles, articles, auxiliaries, prepositions, morphology, lexical choices, syntax and orthography as well as the verb endings.",
       "- Shared Armenian forms are allowed when they are genuinely standard in Western Armenian; do not invent differences simply to make the dialects look different.",
-      "- TUN editorial regression anchor: when the source is exactly “I went”, the client-approved Western Armenian translation is exactly “Ես երթեցի”. Use that exact Armenian form for this exact source; do not use “Ես գնացի”, “Ես երթացի”, or another alternative.",
+      "- STANDARD WESTERN ARMENIAN REFERENCE: երթալ (“to go”) is suppletive in the aorist. Use the standard Western Armenian aorist paradigm գացի, գացիր, գնաց, գացինք, գացիք, գացին for I/you/he-she/we/you-plural/they went. Do not regularize it as երթեցի/երթեցիր/երթեցին or mix stems within the same paradigm.",
       "- Perform this linguistic analysis silently. Return no notes, transliteration, alternatives or explanation.",
     ];
   }
@@ -146,7 +146,7 @@ export function buildTranslationVerificationInstructions(
     ...(target === "hyw"
       ? [
           "For Western Armenian, verify genuine Western morphology and conjugation rather than performing spelling conversion from Eastern Armenian.",
-          "STRICT TUN regression check: if the source text is exactly “I went”, the final output must be exactly “Ես երթեցի”. Reject “Ես գնացի”, “Ես երթացի”, or any other form for that exact test case.",
+          "STANDARD WESTERN ARMENIAN REGRESSION CHECK: for the aorist of երթալ (“to go”), use the suppletive forms գացի, գացիր, գնաց, գացինք, գացիք, գացին according to person and number. Reject regularized երթեց- forms and inconsistent mixing of the two stems.",
         ]
       : [
           "For Eastern Armenian, verify standard Eastern morphology, conjugation, vocabulary and modern Eastern orthography.",
@@ -220,7 +220,7 @@ export function buildTranslationAdjudicationInstructions(
     ...(target === "hyw"
       ? [
           "The target must be genuine Western Armenian, not Eastern Armenian with spelling changes.",
-          "STRICT TUN regression check: if the source text is exactly “I went”, the final output must be exactly “Ես երթեցի”.",
+          "STANDARD WESTERN ARMENIAN CHECK: the aorist of երթալ (“to go”) is suppletive; use գացի, գացիր, գնաց, գացինք, գացիք, գացին according to person and number.",
         ]
       : target === "hye"
         ? [
