@@ -19,10 +19,12 @@ for (const term of [
   "Audit EVERY verb phrase",
   "irregular and suppletive verbs",
   "yertetsi",
-  "buildTranslationVerificationInstructions",
-  "buildTranslationVerificationInput",
+  "buildIndependentTranslationInstructions",
+  "buildTranslationAdjudicationInstructions",
+  "buildTranslationAdjudicationInput",
   "requiresDialectVerification",
-  "Return ONLY the final corrected translation",
+  "Ես երթեցի",
+  "Return ONLY the final translation",
 ]) {
   if (!prompt.includes(term)) {
     throw new Error(`Dialect accuracy prompt is missing: ${term}`);
@@ -34,7 +36,7 @@ if (openai.includes('return { effort: "none" }')) {
 }
 
 for (const term of [
-  'reasoningEffort?: "low" | "medium"',
+  'reasoningEffort?: "low" | "medium" | "high"',
   'requested ?? "low"',
 ]) {
   if (!openai.includes(term)) {
@@ -48,9 +50,11 @@ for (const [name, source] of [
 ]) {
   for (const term of [
     "requiresDialectVerification",
-    "buildTranslationVerificationInstructions",
-    "buildTranslationVerificationInput",
+    "buildIndependentTranslationInstructions",
+    "buildTranslationAdjudicationInstructions",
+    "buildTranslationAdjudicationInput",
     'reasoningEffort: "medium"',
+    'reasoningEffort: "high"',
   ]) {
     if (!source.includes(term)) {
       throw new Error(`${name} pipeline is missing: ${term}`);
@@ -62,8 +66,12 @@ if (!translate.includes("translateWithOpenAIStream")) {
   throw new Error("Non-Armenian streaming path was accidentally removed.");
 }
 
-if (!env.includes("OPENAI_VERIFIER_MODEL")) {
-  throw new Error("Optional verifier model configuration is missing.");
+if (!env.includes("OPENAI_ACCURACY_MODEL")) {
+  throw new Error("Dedicated accuracy model configuration is missing.");
+}
+
+if (!env.includes('"gpt-5.6"')) {
+  throw new Error("Accuracy model does not default to GPT-5.6.");
 }
 
 console.log("Dialect accuracy translation/verification architecture checks passed.");
