@@ -24,6 +24,7 @@ import {
 
 import {
   friendlyOpenAIError,
+  translateWithOpenAI,
   translateWithOpenAIStream,
 } from "../_shared/openai-translation.ts";
 
@@ -41,6 +42,9 @@ import {
 
 import {
   buildTranslationInstructions,
+  buildTranslationVerificationInput,
+  buildTranslationVerificationInstructions,
+  requiresDialectVerification,
 } from "../_shared/translation-prompt.ts";
 
 import {
@@ -73,6 +77,12 @@ function json(
     status,
     headers,
   });
+}
+
+function combinedEstimatedCost(...values: Array<number | null>): number | null {
+  const known = values.filter((value): value is number => typeof value === "number");
+  if (!known.length) return null;
+  return Number(known.reduce((sum, value) => sum + value, 0).toFixed(6));
 }
 
 async function usageEvent(
@@ -1203,83 +1213,178 @@ export default {
                     context,
                   );
 
-                const result =
-                  await translateWithOpenAIStream(
-                    {
-                      apiKey:
-                        config
-                          .openAiApiKey,
+                const openAiConfig = {
+                  apiKey:
+                    config
+                      .openAiApiKey,
 
-                      model:
-                        config
-                          .openAiModel,
+                  model:
+                    config
+                      .openAiModel,
 
-                      timeoutMs:
-                        config
-                          .openAiTimeoutMs,
+                  timeoutMs:
+                    config
+                      .openAiTimeoutMs,
 
-                      inputCostPerMillion:
-                        config
-                          .inputCostPerMillion,
+                  inputCostPerMillion:
+                    config
+                      .inputCostPerMillion,
 
-                      outputCostPerMillion:
-                        config
-                          .outputCostPerMillion,
-                    },
+                  outputCostPerMillion:
+                    config
+                      .outputCostPerMillion,
 
-                    instructions,
+                  reasoningEffort:
+                    "low" as const,
+                };
 
-                    payload.text,
+                if (
+                  requiresDialectVerification(
+                    payload
+                      .targetLanguage,
+                  )
+                ) {
+                  const draft =
+                    await translateWithOpenAI(
+                      openAiConfig,
 
-                    (
-                      delta,
-                    ) => {
-                      if (
-                        request
-                          .signal
-                          .aborted
-                      ) {
-                        throw new DOMException(
-                          "Translation request was cancelled.",
-                          "AbortError",
-                        );
-                      }
+                      instructions,
 
-                      streamedText +=
-                        delta;
+                      payload.text,
 
-                      controller.enqueue(
-                        sse(
-                          encoder,
-                          {
-                            type:
-                              "delta",
+                      request.signal,
+                    );
 
-                            delta,
-                          },
-                        ),
-                      );
-                    },
+                  const verification =
+                    await translateWithOpenAI(
+                      {
+                        ...openAiConfig,
 
-                    request.signal,
+                        model:
+                          config
+                            .openAiVerifierModel,
+
+                        reasoningEffort:
+                          "medium",
+                      },
+
+                      buildTranslationVerificationInstructions(
+                        payload
+                          .sourceLanguage,
+
+                        payload
+                          .targetLanguage,
+
+                        context,
+                      ),
+
+                      buildTranslationVerificationInput(
+                        payload.text,
+                        draft
+                          .translation,
+                      ),
+
+                      request.signal,
+                    );
+
+                  translation =
+                    verification
+                      .translation;
+
+                  streamedText =
+                    translation;
+
+                  estimatedCost =
+                    combinedEstimatedCost(
+                      draft
+                        .estimatedCost,
+
+                      verification
+                        .estimatedCost,
+                    );
+
+                  openAiProcessed =
+                    true;
+
+                  modelUsed =
+                    config
+                      .openAiVerifierModel ===
+                    config
+                      .openAiModel
+                      ? `${config.openAiModel}+dialect-verify`
+                      : `${config.openAiModel}->${config.openAiVerifierModel}`;
+
+                  controller.enqueue(
+                    sse(
+                      encoder,
+                      {
+                        type:
+                          "delta",
+
+                        delta:
+                          translation,
+                      },
+                    ),
                   );
+                } else {
+                  const result =
+                    await translateWithOpenAIStream(
+                      openAiConfig,
 
-                translation =
-                  result
-                    .translation ||
-                  streamedText
-                    .trim();
+                      instructions,
 
-                estimatedCost =
-                  result
-                    .estimatedCost;
+                      payload.text,
 
-                openAiProcessed =
-                  true;
+                      (
+                        delta,
+                      ) => {
+                        if (
+                          request
+                            .signal
+                            .aborted
+                        ) {
+                          throw new DOMException(
+                            "Translation request was cancelled.",
+                            "AbortError",
+                          );
+                        }
 
-                modelUsed =
-                  config
-                    .openAiModel;
+                        streamedText +=
+                          delta;
+
+                        controller.enqueue(
+                          sse(
+                            encoder,
+                            {
+                              type:
+                                "delta",
+
+                              delta,
+                            },
+                          ),
+                        );
+                      },
+
+                      request.signal,
+                    );
+
+                  translation =
+                    result
+                      .translation ||
+                    streamedText
+                      .trim();
+
+                  estimatedCost =
+                    result
+                      .estimatedCost;
+
+                  openAiProcessed =
+                    true;
+
+                  modelUsed =
+                    config
+                      .openAiModel;
+                }
               }
 
               /*
