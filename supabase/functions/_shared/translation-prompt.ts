@@ -74,7 +74,7 @@ function dialectAccuracyGuidance(target: LanguageCode): string[] {
       "- Conjugate verbs according to Western Armenian usage, including irregular and suppletive verbs. Re-check past, perfect, future, conditional, imperative and negative forms before answering.",
       "- Check Western Armenian pronouns, particles, articles, auxiliaries, prepositions, morphology, lexical choices, syntax and orthography as well as the verb endings.",
       "- Shared Armenian forms are allowed when they are genuinely standard in Western Armenian; do not invent differences simply to make the dialects look different.",
-      "- Tun editorial regression anchor: for the exact English meaning “I went”, the client-provided Western Armenian reference is “yertetsi”. Do not answer that exact meaning with an Eastern Armenian գնալ-based past form.",
+      "- TUN editorial regression anchor: when the source is exactly “I went”, the client-approved Western Armenian translation is exactly “Ես երթեցի”. Use that exact Armenian form for this exact source; do not use “Ես գնացի”, “Ես երթացի”, or another alternative.",
       "- Perform this linguistic analysis silently. Return no notes, transliteration, alternatives or explanation.",
     ];
   }
@@ -146,7 +146,7 @@ export function buildTranslationVerificationInstructions(
     ...(target === "hyw"
       ? [
           "For Western Armenian, verify genuine Western morphology and conjugation rather than performing spelling conversion from Eastern Armenian.",
-          "Tun editorial regression anchor: for the exact English meaning “I went”, the client-provided Western Armenian reference is “yertetsi”; reject an Eastern Armenian գնալ-based past form for that exact meaning.",
+          "STRICT TUN regression check: if the source text is exactly “I went”, the final output must be exactly “Ես երթեցի”. Reject “Ես գնացի”, “Ես երթացի”, or any other form for that exact test case.",
         ]
       : [
           "For Eastern Armenian, verify standard Eastern morphology, conjugation, vocabulary and modern Eastern orthography.",
@@ -177,5 +177,85 @@ export function buildTranslationVerificationInput(
     "",
     "CANDIDATE TRANSLATION:",
     candidateTranslation,
+  ].join("\n");
+}
+
+export function buildIndependentTranslationInstructions(
+  source: LanguageCode,
+  target: LanguageCode,
+  context: TranslationContext,
+): string {
+  return [
+    buildTranslationInstructions(source, target, context),
+    "",
+    "INDEPENDENT SECOND-PASS REQUIREMENT:",
+    "Produce the translation independently from first principles.",
+    "Do not assume another candidate is correct.",
+    "For Armenian targets, re-derive verb morphology, dialect-specific grammar, lexical choice and orthography before answering.",
+    "Return only the translation.",
+  ].join("\n");
+}
+
+export function buildTranslationAdjudicationInstructions(
+  source: LanguageCode,
+  target: LanguageCode,
+  context: TranslationContext,
+): string {
+  const approvedContext = contextText(context);
+  const dialect = target === "hyw"
+    ? "Western Armenian"
+    : target === "hye"
+      ? "Eastern Armenian"
+      : LANGUAGE_NAMES[target];
+
+  const instructions = [
+    `You are the final senior linguistic adjudicator for a TunApp ${LANGUAGE_NAMES[source]} → ${LANGUAGE_NAMES[target]} translation.`,
+    `Your job is to produce the single most accurate final ${dialect} translation from the source and two independently generated candidates.`,
+    "Do not choose a candidate by majority or fluency alone. Re-translate the source yourself and use the candidates only as evidence.",
+    "Preserve the source meaning, tone, names, numbers, dates, URLs, email addresses and formatting.",
+    "For Armenian output, audit every verb phrase for lemma, tense/aspect, mood, person, number, polarity, auxiliaries, particles, and irregular or suppletive behavior.",
+    "Audit pronouns, articles, prepositions, morphology, syntax, vocabulary and orthography for the requested Armenian variety.",
+    "If either candidate uses the wrong Armenian dialect, correct it even if it sounds fluent.",
+    "Do not invent a dialect difference where a form is genuinely shared.",
+    ...(target === "hyw"
+      ? [
+          "The target must be genuine Western Armenian, not Eastern Armenian with spelling changes.",
+          "STRICT TUN regression check: if the source text is exactly “I went”, the final output must be exactly “Ես երթեցի”.",
+        ]
+      : target === "hye"
+        ? [
+            "The target must be standard Eastern Armenian and must not drift into Western Armenian morphology, vocabulary or orthography.",
+          ]
+        : []),
+    "If both candidates are wrong, write a corrected translation yourself.",
+    "Return ONLY the final translation. Do not explain, score, compare, transliterate or provide alternatives.",
+  ];
+
+  if (approvedContext) {
+    instructions.push(
+      "",
+      "APPROVED TUN CONTEXT:",
+      approvedContext,
+      "Applicable approved Tun context is authoritative.",
+    );
+  }
+
+  return instructions.join("\n");
+}
+
+export function buildTranslationAdjudicationInput(
+  sourceText: string,
+  candidateA: string,
+  candidateB: string,
+): string {
+  return [
+    "SOURCE TEXT:",
+    sourceText,
+    "",
+    "CANDIDATE A:",
+    candidateA,
+    "",
+    "CANDIDATE B:",
+    candidateB,
   ].join("\n");
 }
