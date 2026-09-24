@@ -13,7 +13,7 @@ export interface OpenAITranslationConfig {
   timeoutMs: number;
   inputCostPerMillion: number;
   outputCostPerMillion: number;
-  reasoningEffort?: "low" | "medium";
+  reasoningEffort?: "low" | "medium" | "high";
 }
 
 export interface OpenAITranslationResult {
@@ -69,8 +69,8 @@ export function friendlyOpenAIError(error: unknown): { status: number; message: 
 
 function reasoningForModel(
   model: string,
-  requested: "low" | "medium" | undefined,
-): { effort: "minimal" | "low" | "medium" } | undefined {
+  requested: "low" | "medium" | "high" | undefined,
+): { effort: "minimal" | "low" | "medium" | "high" } | undefined {
   const normalized = model.trim().toLowerCase();
 
   if (
