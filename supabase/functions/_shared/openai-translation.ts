@@ -13,6 +13,7 @@ export interface OpenAITranslationConfig {
   timeoutMs: number;
   inputCostPerMillion: number;
   outputCostPerMillion: number;
+  reasoningEffort?: "low" | "medium";
 }
 
 export interface OpenAITranslationResult {
@@ -66,20 +67,19 @@ export function friendlyOpenAIError(error: unknown): { status: number; message: 
   return { status: 502, message: "Translation is temporarily unavailable. Please try again.", code: "openai_error" };
 }
 
-function reasoningForModel(model: string): { effort: "none" | "minimal" } | undefined {
+function reasoningForModel(
+  model: string,
+  requested: "low" | "medium" | undefined,
+): { effort: "minimal" | "low" | "medium" } | undefined {
   const normalized = model.trim().toLowerCase();
 
-  // GPT-5.4 supports `none`; use it explicitly for the client's latency-
-  // sensitive translation workload. This does not change the selected model.
   if (
+    normalized === "gpt-5.6" ||
+    normalized.startsWith("gpt-5.6-") ||
     normalized === "gpt-5.4" ||
-    normalized.startsWith("gpt-5.4-") ||
-    normalized === "gpt-5.4-mini" ||
-    normalized.startsWith("gpt-5.4-mini-") ||
-    normalized === "gpt-5.4-nano" ||
-    normalized.startsWith("gpt-5.4-nano-")
+    normalized.startsWith("gpt-5.4-")
   ) {
-    return { effort: "none" };
+    return { effort: requested ?? "low" };
   }
 
   if (normalized === "gpt-5-mini" || normalized.startsWith("gpt-5-mini-")) {
@@ -105,7 +105,7 @@ function createOpenAIClient(config: OpenAITranslationConfig): OpenAI {
 }
 
 function requestBody(config: OpenAITranslationConfig, instructions: string, text: string) {
-  const reasoning = reasoningForModel(config.model);
+  const reasoning = reasoningForModel(config.model, config.reasoningEffort);
   return {
     model: config.model,
     instructions,
