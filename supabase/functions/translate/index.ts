@@ -41,9 +41,10 @@ import {
 } from "../_shared/security.ts";
 
 import {
+  buildIndependentTranslationInstructions,
+  buildTranslationAdjudicationInput,
+  buildTranslationAdjudicationInstructions,
   buildTranslationInstructions,
-  buildTranslationVerificationInput,
-  buildTranslationVerificationInstructions,
   requiresDialectVerification,
 } from "../_shared/translation-prompt.ts";
 
@@ -1244,7 +1245,18 @@ export default {
                       .targetLanguage,
                   )
                 ) {
-                  const draft =
+                  /*
+                   * Accuracy-first Armenian path:
+                   * - Candidate A: normal translation model.
+                   * - Candidate B: independent re-translation with the
+                   *   dedicated accuracy model.
+                   * - Final pass: high-reasoning adjudication that
+                   *   re-translates from the source and resolves any
+                   *   disagreement between the candidates.
+                   *
+                   * Only the adjudicated result is sent to the browser.
+                   */
+                  const candidateA =
                     await translateWithOpenAI(
                       openAiConfig,
 
@@ -1255,20 +1267,20 @@ export default {
                       request.signal,
                     );
 
-                  const verification =
+                  const candidateB =
                     await translateWithOpenAI(
                       {
                         ...openAiConfig,
 
                         model:
                           config
-                            .openAiVerifierModel,
+                            .openAiAccuracyModel,
 
                         reasoningEffort:
                           "medium",
                       },
 
-                      buildTranslationVerificationInstructions(
+                      buildIndependentTranslationInstructions(
                         payload
                           .sourceLanguage,
 
@@ -1278,9 +1290,41 @@ export default {
                         context,
                       ),
 
-                      buildTranslationVerificationInput(
+                      payload.text,
+
+                      request.signal,
+                    );
+
+                  const adjudicated =
+                    await translateWithOpenAI(
+                      {
+                        ...openAiConfig,
+
+                        model:
+                          config
+                            .openAiAccuracyModel,
+
+                        reasoningEffort:
+                          "high",
+                      },
+
+                      buildTranslationAdjudicationInstructions(
+                        payload
+                          .sourceLanguage,
+
+                        payload
+                          .targetLanguage,
+
+                        context,
+                      ),
+
+                      buildTranslationAdjudicationInput(
                         payload.text,
-                        draft
+
+                        candidateA
+                          .translation,
+
+                        candidateB
                           .translation,
                       ),
 
@@ -1288,7 +1332,7 @@ export default {
                     );
 
                   translation =
-                    verification
+                    adjudicated
                       .translation;
 
                   streamedText =
@@ -1296,10 +1340,13 @@ export default {
 
                   estimatedCost =
                     combinedEstimatedCost(
-                      draft
+                      candidateA
                         .estimatedCost,
 
-                      verification
+                      candidateB
+                        .estimatedCost,
+
+                      adjudicated
                         .estimatedCost,
                     );
 
@@ -1307,12 +1354,7 @@ export default {
                     true;
 
                   modelUsed =
-                    config
-                      .openAiVerifierModel ===
-                    config
-                      .openAiModel
-                      ? `${config.openAiModel}+dialect-verify`
-                      : `${config.openAiModel}->${config.openAiVerifierModel}`;
+                    `${config.openAiModel}+${config.openAiAccuracyModel}+adjudicate`;
 
                   controller.enqueue(
                     sse(
