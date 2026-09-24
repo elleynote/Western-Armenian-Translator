@@ -18,12 +18,13 @@ for (const term of [
   "WESTERN ARMENIAN DIALECT CONTROL",
   "Audit EVERY verb phrase",
   "irregular and suppletive verbs",
-  "yertetsi",
+  "գացի, գացիր, գնաց, գացինք, գացիք, գացին",
   "buildIndependentTranslationInstructions",
   "buildTranslationAdjudicationInstructions",
   "buildTranslationAdjudicationInput",
   "requiresDialectVerification",
-  "Ես երթեցի",
+  "Preserve ambiguity",
+  "singular they",
   "Return ONLY the final translation",
 ]) {
   if (!prompt.includes(term)) {
